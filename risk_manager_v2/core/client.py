@@ -156,8 +156,8 @@ class ProjectXClient:
         }
         
         side_map = {
-            "BUY": OrderSide.BUY,
-            "SELL": OrderSide.SELL
+            "BUY": OrderSide.BID,
+            "SELL": OrderSide.ASK
         }
         
         return Order(
@@ -167,7 +167,7 @@ class ProjectXClient:
             symbol_id=payload["symbolId"],
             status=status_map.get(payload["status"], OrderStatus.OPEN),
             order_type=type_map.get(payload["orderType"], OrderType.MARKET),
-            side=side_map.get(payload["side"], OrderSide.BUY),
+            side=side_map.get(payload["side"], OrderSide.BID),
             size=payload["size"],
             limit_price=payload.get("limitPrice"),
             stop_price=payload.get("stopPrice"),
