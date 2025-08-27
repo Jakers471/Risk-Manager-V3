@@ -94,6 +94,56 @@ class AuthManager:
             self.logger.error(f"Full traceback: {traceback.format_exc()}")
             return False
     
+    def validate_token(self) -> bool:
+        """Validate current token using /api/Auth/validate endpoint."""
+        try:
+            token = self.config.get("auth.token")
+            if not token:
+                self.logger.warning("No token available for validation")
+                return False
+            
+            # Update session headers with current token
+            self.session.headers.update({
+                'Authorization': f'Bearer {token}'
+            })
+            
+            # Make validation request
+            url = f"{self.config.get_api_url()}/api/Auth/validate"
+            self.logger.info(f"Validating token at: {url}")
+            
+            response = self.session.post(
+                url,
+                timeout=self.config.get("api.timeout", 30)
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    # Update token if a new one is provided
+                    new_token = data.get("newToken")
+                    if new_token:
+                        self.logger.info("Received new token from validation")
+                        self.config.set("auth.token", new_token)
+                        # Update expiry (24 hours from now)
+                        expiry = datetime.now() + timedelta(hours=24)
+                        self.config.set("auth.token_expiry", expiry.isoformat())
+                        self.session.headers.update({
+                            'Authorization': f'Bearer {new_token}'
+                        })
+                    else:
+                        self.logger.info("Token validation successful")
+                    return True
+                else:
+                    self.logger.warning(f"Token validation failed: {data.get('errorMessage', 'Unknown error')}")
+                    return False
+            else:
+                self.logger.warning(f"Token validation failed: {response.status_code} - {response.text}")
+                return False
+                
+        except Exception as e:
+            self.logger.error(f"Token validation error: {e}")
+            return False
+    
     def is_authenticated(self) -> bool:
         """Check if currently authenticated."""
         token = self.config.get("auth.token")
@@ -119,12 +169,19 @@ class AuthManager:
             return False
     
     def refresh_token(self) -> bool:
-        """Refresh authentication token."""
-        username = self.config.get("auth.userName")  # Updated field name
+        """Refresh authentication token using proper flow."""
+        # First try to validate existing token
+        if self.validate_token():
+            self.logger.info("Token validation successful")
+            return True
+        
+        # If validation fails, re-authenticate with API key
+        self.logger.info("Token validation failed, attempting re-authentication")
+        username = self.config.get("auth.userName")
         api_key = self.config.get("auth.api_key")
         
         if not username or not api_key:
-            self.logger.error("No credentials available for token refresh")
+            self.logger.error("No credentials available for re-authentication")
             return False
         
         return self.authenticate(username, api_key)
@@ -151,24 +208,8 @@ class AuthManager:
                 return False
             
             # Try to validate session
-            response = self.session.post(
-                f"{self.config.get_api_url()}/api/Auth/validate",
-                timeout=self.config.get("api.timeout", 30)
-            )
+            return self.validate_token()
             
-            if response.status_code == 200:
-                data = response.json()
-                if data.get("success"):
-                    # Update token if a new one is provided
-                    new_token = data.get("newToken")
-                    if new_token:
-                        self.config.set("auth.token", new_token)
-                        self.session.headers.update({
-                            'Authorization': f'Bearer {new_token}'
-                        })
-                    return True
-            
-            return False
         except Exception as e:
             self.logger.error(f"Connection test failed: {e}")
             return False

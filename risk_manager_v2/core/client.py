@@ -52,11 +52,12 @@ class ProjectXClient:
                 if response.status_code == 200:
                     return response.json()
                 elif response.status_code == 401:
-                    self.logger.warning("Authentication failed, attempting refresh")
+                    self.logger.warning("Authentication failed, attempting token validation")
+                    # Try to validate/refresh token first
                     if self.auth.refresh_token():
                         continue
                     else:
-                        self.logger.error("Token refresh failed")
+                        self.logger.error("Token validation failed, re-authentication required")
                         return None
                 elif response.status_code == 429:
                     wait_time = 2 ** attempt
@@ -116,10 +117,10 @@ class ProjectXClient:
         return None
     
     # Position Management
-    def get_positions(self, account_id: str) -> Optional[List[Dict]]:
+    def get_open_positions(self, account_id: str) -> Optional[List[Dict]]:
         """Get open positions for account."""
         data = {"accountId": int(account_id)}
-        response = self._make_request("POST", "/api/Position/search", data=data)
+        response = self._make_request("POST", "/api/Position/searchOpen", data=data)
         if response and response.get("success"):
             return response.get("positions", [])
         return None
@@ -144,7 +145,7 @@ class ProjectXClient:
     def close_all_positions(self, account_id: str) -> Optional[Dict]:
         """Close all positions for account."""
         # Get all positions first, then close each one
-        positions = self.get_positions(account_id)
+        positions = self.get_open_positions(account_id)
         if not positions:
             return {"success": True, "message": "No positions to close"}
         
@@ -158,10 +159,23 @@ class ProjectXClient:
         return {"success": True, "closed_positions": results}
     
     # Order Management
-    def get_orders(self, account_id: str) -> Optional[List[Dict]]:
+    def get_open_orders(self, account_id: str) -> Optional[List[Dict]]:
         """Get pending orders for account."""
         data = {"accountId": int(account_id)}
         response = self._make_request("POST", "/api/Order/searchOpen", data=data)
+        if response and response.get("success"):
+            return response.get("orders", [])
+        return None
+    
+    def get_orders(self, account_id: str, start_timestamp: str = None, end_timestamp: str = None) -> Optional[List[Dict]]:
+        """Get all orders for account (including filled/cancelled)."""
+        data = {"accountId": int(account_id)}
+        if start_timestamp:
+            data["startTimestamp"] = start_timestamp
+        if end_timestamp:
+            data["endTimestamp"] = end_timestamp
+        
+        response = self._make_request("POST", "/api/Order/search", data=data)
         if response and response.get("success"):
             return response.get("orders", [])
         return None
@@ -204,7 +218,7 @@ class ProjectXClient:
     
     def cancel_all_orders(self, account_id: str) -> Optional[Dict]:
         """Cancel all orders for account."""
-        orders = self.get_orders(account_id)
+        orders = self.get_open_orders(account_id)
         if not orders:
             return {"success": True, "message": "No orders to cancel"}
         
@@ -260,15 +274,30 @@ class ProjectXClient:
         return None
     
     # Market Data
-    def get_market_data_bars(self, contract_id: str, start_time: str, end_time: str, interval: str = "1m") -> Optional[List[Dict]]:
+    def get_market_data_bars(self,
+        contract_id: str,
+        start_time: str,
+        end_time: str,
+        unit: int = 2,          # 1=Second, 2=Minute, 3=Hour, 4=Day, 5=Week, 6=Month
+        unit_number: int = 1,
+        live: bool = False,
+        limit: Optional[int] = None,
+        include_partial_bar: bool = False
+    ) -> Optional[List[Dict]]:
         """Get market data bars for contract."""
         data = {
             "contractId": contract_id,
+            "live": live,
             "startTime": start_time,
             "endTime": end_time,
-            "interval": interval
+            "unit": unit,
+            "unitNumber": unit_number,
+            "includePartialBar": include_partial_bar
         }
-        response = self._make_request("POST", "/api/MarketData/bars", data=data)
+        if limit is not None:
+            data["limit"] = int(limit)
+        
+        response = self._make_request("POST", "/api/History/retrieveBars", data=data)
         if response and response.get("success"):
             return response.get("bars", [])
         return None
