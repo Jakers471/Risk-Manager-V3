@@ -17,7 +17,8 @@ class BaseMenu:
         self.logger = get_logger(__name__)
         self.config = ConfigStore()
         self.auth = AuthManager(self.config)
-        self.client = ProjectXClient(self.config, self.auth)
+        # Use new client interface with environment variables
+        self.client = ProjectXClient()
     
     def run(self):
         """Override this method in subclasses."""

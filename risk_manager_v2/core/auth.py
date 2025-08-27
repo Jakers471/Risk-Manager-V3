@@ -1,232 +1,139 @@
-﻿"""
-Authentication Management
+﻿import json, os, requests, time
+AUTH_FILE = os.path.join("runtime","auth.json")
+BASE = os.getenv("PROJECTX_BASE_URL", "https://api.topstepx.com")
+CONNECT_TIMEOUT = float(os.getenv("PX_CONNECT_TIMEOUT","2"))
+READ_TIMEOUT    = float(os.getenv("PX_READ_TIMEOUT","5"))
+_TIMEOUT = (CONNECT_TIMEOUT, READ_TIMEOUT)
 
-Handles TopStepX API authentication and token management.
-"""
+def _load_cache():
+    try:
+        with open(AUTH_FILE,"r",encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
 
-import requests
-import json
-from datetime import datetime, timedelta
-from typing import Dict, Optional, Tuple
-from .config import ConfigStore
-from .logger import get_logger
+def _save_cache(data):
+    os.makedirs(os.path.dirname(AUTH_FILE), exist_ok=True)
+    with open(AUTH_FILE,"w",encoding="utf-8") as f:
+        json.dump(data,f)
+
+def _is_jwt(tok:str) -> bool:
+    return isinstance(tok,str) and tok.count(".")==2
+
+def get_bearer() -> str:
+    """
+    Source of truth for the bearer token:
+    1) runtime/auth.json: {"token":"..."}
+    2) env PROJECTX_API_KEY (if it *is* a JWT)
+    """
+    c = _load_cache()
+    tok = c.get("token") or os.getenv("PROJECTX_API_KEY","")
+    return tok
+
+def set_bearer(tok: str):
+    c = _load_cache(); c["token"] = tok; _save_cache(c)
+
+def validate_and_refresh(tok: str) -> str:
+    """
+    POST /api/Auth/validate
+    Returns 200 and often a new token in body; if not, keep the same.
+    """
+    if not _is_jwt(tok):
+        # Not a JWT: cannot validate; caller must supply a real JWT first.
+        return tok
+    url = f"{BASE}/api/Auth/validate"
+    r = requests.post(url, headers={
+        "accept":"text/plain",
+        "Content-Type":"application/json",
+        "Authorization": f"Bearer {tok}"
+    }, json={}, timeout=_TIMEOUT)
+    if r.status_code == 200 and r.text.strip():
+        return r.text.strip()
+    r.raise_for_status()
+    return tok
+
+def auth_headers() -> dict:
+    tok = get_bearer()
+    # one opportunistic refresh on each process start / call site
+    try:
+        new_tok = validate_and_refresh(tok)
+        if new_tok and new_tok != tok:
+            set_bearer(new_tok)
+            tok = new_tok
+    except Exception:
+        # if validate fails (expired/401) we keep the old token;
+        # caller will still get 401 and can prompt the user.
+        pass
+    return {"accept":"text/plain","Content-Type":"application/json",
+            **({"Authorization":f"Bearer {tok}"} if tok else {})}
 
 class AuthManager:
-    """Manages TopStepX API authentication."""
+    """Authentication manager for CLI compatibility."""
     
-    def __init__(self, config: ConfigStore):
+    def __init__(self, config):
+        """Initialize auth manager with config."""
         self.config = config
-        self.logger = get_logger(__name__)
         self.session = requests.Session()
         self.session.headers.update({
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            "Content-Type": "application/json",
+            "Accept": "application/json"
         })
-        self.logger.info(f"Session headers: {dict(self.session.headers)}")
+    
+    def is_authenticated(self) -> bool:
+        """Check if user is authenticated."""
+        token = get_bearer()
+        return bool(token and _is_jwt(token))
     
     def authenticate(self, username: str, api_key: str) -> bool:
-        """Authenticate with TopStepX API."""
+        """Authenticate with username and API key."""
         try:
-            self.logger.info(f"Authenticating user: {username}")
-            self.logger.info(f"API URL: {self.config.get_api_url()}")
-            
-            # Prepare authentication payload
-            auth_data = {
+            url = f"{BASE}/api/Auth/loginKey"
+            data = {
                 "userName": username,
                 "apiKey": api_key
             }
-            self.logger.info(f"Auth payload: {auth_data}")
             
-            # Make authentication request
-            url = f"{self.config.get_api_url()}/api/Auth/loginKey"
-            self.logger.info(f"Making POST request to: {url}")
+            response = requests.post(url, json=data, timeout=_TIMEOUT)
+            response.raise_for_status()
             
-            response = self.session.post(
-                url,
-                json=auth_data,
-                timeout=self.config.get("api.timeout", 30)
-            )
-            
-            self.logger.info(f"Response status: {response.status_code}")
-            self.logger.info(f"Response headers: {dict(response.headers)}")
-            
-            if response.status_code == 200:
-                data = response.json()
-                self.logger.info(f"Authentication response: {data}")
-                
-                # Check for success field
-                if data.get("success"):
-                    token = data.get("token")
-                    
-                    if token:
-                        # Calculate token expiry (24 hours from now)
-                        expiry = datetime.now() + timedelta(hours=24)
-                        
-                        # Save credentials and token
-                        self.config.update_auth(username, api_key)
-                        self.config.set("auth.token", token)
-                        self.config.set("auth.token_expiry", expiry.isoformat())
-                        
-                        # Update session headers
-                        self.session.headers.update({
-                            'Authorization': f'Bearer {token}'
-                        })
-                        
-                        self.logger.info("Authentication successful")
-                        return True
-                    else:
-                        self.logger.error("No token received in response")
-                        return False
-                else:
-                    error_msg = data.get("errorMessage", "Unknown error")
-                    self.logger.error(f"Authentication failed: {error_msg}")
-                    return False
-            else:
-                self.logger.error(f"Authentication failed: {response.status_code} - {response.text}")
-                return False
-                
-        except requests.exceptions.RequestException as e:
-            self.logger.error(f"Authentication request failed: {e}")
+            result = response.json()
+            if result.get("success") and result.get("token"):
+                set_bearer(result["token"])
+                return True
             return False
-        except Exception as e:
-            self.logger.error(f"Authentication error: {e}")
-            import traceback
-            self.logger.error(f"Full traceback: {traceback.format_exc()}")
+        except Exception:
             return False
+    
+    def get_session(self):
+        """Get authenticated session."""
+        token = get_bearer()
+        if token:
+            self.session.headers.update({"Authorization": f"Bearer {token}"})
+        return self.session
     
     def validate_token(self) -> bool:
-        """Validate current token using /api/Auth/validate endpoint."""
+        """Validate current token."""
         try:
-            token = self.config.get("auth.token")
-            if not token:
-                self.logger.warning("No token available for validation")
+            token = get_bearer()
+            if not token or not _is_jwt(token):
                 return False
             
-            # Update session headers with current token
-            self.session.headers.update({
-                'Authorization': f'Bearer {token}'
-            })
-            
-            # Make validation request
-            url = f"{self.config.get_api_url()}/api/Auth/validate"
-            self.logger.info(f"Validating token at: {url}")
-            
-            response = self.session.post(
-                url,
-                timeout=self.config.get("api.timeout", 30)
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                if data.get("success"):
-                    # Update token if a new one is provided
-                    new_token = data.get("newToken")
-                    if new_token:
-                        self.logger.info("Received new token from validation")
-                        self.config.set("auth.token", new_token)
-                        # Update expiry (24 hours from now)
-                        expiry = datetime.now() + timedelta(hours=24)
-                        self.config.set("auth.token_expiry", expiry.isoformat())
-                        self.session.headers.update({
-                            'Authorization': f'Bearer {new_token}'
-                        })
-                    else:
-                        self.logger.info("Token validation successful")
-                    return True
-                else:
-                    self.logger.warning(f"Token validation failed: {data.get('errorMessage', 'Unknown error')}")
-                    return False
-            else:
-                self.logger.warning(f"Token validation failed: {response.status_code} - {response.text}")
-                return False
-                
-        except Exception as e:
-            self.logger.error(f"Token validation error: {e}")
-            return False
-    
-    def is_authenticated(self) -> bool:
-        """Check if currently authenticated."""
-        token = self.config.get("auth.token")
-        token_expiry = self.config.get("auth.token_expiry")
-        
-        if not token or not token_expiry:
-            return False
-        
-        try:
-            expiry = datetime.fromisoformat(token_expiry)
-            if datetime.now() >= expiry:
-                self.logger.info("Token expired")
-                return False
-            
-            # Update session headers
-            self.session.headers.update({
-                'Authorization': f'Bearer {token}'
-            })
-            
+            new_token = validate_and_refresh(token)
+            if new_token != token:
+                set_bearer(new_token)
             return True
-        except Exception as e:
-            self.logger.error(f"Error checking authentication: {e}")
+        except Exception:
             return False
     
     def refresh_token(self) -> bool:
-        """Refresh authentication token using proper flow."""
-        # First try to validate existing token
-        if self.validate_token():
-            self.logger.info("Token validation successful")
-            return True
-        
-        # If validation fails, re-authenticate with API key
-        self.logger.info("Token validation failed, attempting re-authentication")
-        username = self.config.get("auth.userName")
-        api_key = self.config.get("auth.api_key")
-        
-        if not username or not api_key:
-            self.logger.error("No credentials available for re-authentication")
-            return False
-        
-        return self.authenticate(username, api_key)
-    
-    def logout(self) -> None:
-        """Clear authentication data."""
-        self.config.set("auth.token", "")
-        self.config.set("auth.token_expiry", "")
-        self.session.headers.pop('Authorization', None)
-        self.logger.info("Logged out")
-    
-    def get_session(self) -> requests.Session:
-        """Get authenticated session."""
-        if not self.is_authenticated():
-            if not self.refresh_token():
-                raise Exception("Not authenticated and refresh failed")
-        
-        return self.session
-    
-    def test_connection(self) -> bool:
-        """Test API connection."""
+        """Refresh authentication token."""
         try:
-            if not self.is_authenticated():
-                return False
+            # Try to authenticate using config credentials
+            username = self.config.get("auth.userName", "")
+            api_key = self.config.get("auth.api_key", "")
             
-            # Try to validate session
-            return self.validate_token()
-            
-        except Exception as e:
-            self.logger.error(f"Connection test failed: {e}")
+            if username and api_key:
+                return self.authenticate(username, api_key)
             return False
-
-if __name__ == "__main__":
-    print("Testing AuthManager...")
-    
-    # Test basic initialization
-    from risk_manager_v2.core.config import ConfigStore
-    config = ConfigStore()
-    auth = AuthManager(config)
-    print("âœ… AuthManager created successfully!")
-    
-    # Test authentication check (should be False initially)
-    is_auth = auth.is_authenticated()
-    print(f"âœ… Authentication status: {is_auth}")
-    
-    print("âœ… AuthManager test completed!")
-
-
+        except Exception:
+            return False

@@ -271,3 +271,16 @@ class ProjectXClient:
         except Exception as e:
             logger.error(f"Failed to place market order: {e}")
             return {"status": "error", "message": str(e)}
+    
+    def test_connection(self) -> bool:
+        """Test API connection."""
+        if self.simulator():
+            return True
+        
+        try:
+            # Try to get accounts as a simple connection test
+            response = self._make_request("GET", "/api/accounts", use_read_bucket=True)
+            return True
+        except Exception as e:
+            logger.error(f"Connection test failed: {e}")
+            return False
