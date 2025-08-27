@@ -12,3 +12,10 @@ ENDPOINTS:
 - POST /api/Contract/available, /api/Contract/search, /api/Contract/searchById
 - POST /api/MarketData/bars
 TESTS: 1 mocked unit test (endpoint path/payload + 401->retry path)
+
+MODULARIZATION POLICY
+- If a change approaches ~400 LOC, you MAY split code across up to 1–3 files INSIDE your OWN paths only:
+  OWN: risk_manager_v2/core/clients/projectx.py, risk_manager_v2/utils/rate_limiter.py
+- Keep PRs small: ≤5 files and ideally ≤400 LOC total; otherwise split into follow-up PRs.
+- No new dependencies. Do NOT touch DO NOT TOUCH paths.
+- Keep Import Smoke green: avoid heavy work at module import time.
