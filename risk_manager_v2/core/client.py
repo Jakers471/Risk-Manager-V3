@@ -1,235 +1,273 @@
 """
-TopStepX API Client
+ProjectX Client Implementation
 
-Handles all API communication with the TopStepX Gateway.
+Handles REST API communication with ProjectX trading platform.
 """
 
+import os
+import json
 import requests
-import time
-from typing import Dict, List, Optional, Any
-from .config import ConfigStore
-from .auth import AuthManager
-from .logger import get_logger
-from risk_manager_v2.utils.rate_limiter import TopStepXRateLimiter
+from typing import List, Dict, Any, Optional
+from datetime import datetime
+from risk_manager_v2.models.trading_positions import Position
+from risk_manager_v2.models.trading_orders import Order
+from risk_manager_v2.models.trading_base import PositionSide, OrderSide, OrderType, OrderStatus
+from risk_manager_v2.utils.rate_limiter import TopStepXRateLimiter, topstepx_rate_limited, exponential_backoff
+from risk_manager_v2.core.logger import get_logger
 
-class ProjectXError(Exception):
-    """Custom exception for ProjectX API errors."""
-    def __init__(self, message: str, status_code: Optional[int] = None, response_data: Optional[Dict] = None):
-        super().__init__(message)
-        self.status_code = status_code
-        self.response_data = response_data
+logger = get_logger(__name__)
 
 class ProjectXClient:
-    """TopStepX API client with rate limiting and error handling."""
+    """ProjectX REST API client with rate limiting and mock data support."""
     
-    def __init__(self, config: ConfigStore, auth: AuthManager):
-        self.config = config
-        self.auth = auth
-        self.logger = get_logger(__name__)
-        self.base_url = config.get_api_url()
-        self.max_retries = config.get("api.max_retries", 3)
-        self.timeout = config.get("api.timeout", 30)
-        self.ratelimiter = TopStepXRateLimiter()
+    def __init__(self, base_url: Optional[str] = None, api_key: Optional[str] = None):
+        """Initialize ProjectX client."""
+        self.base_url = base_url or os.getenv("PROJECTX_BASE_URL", "https://gateway-api-demo.s2f.projectx.com")
+        self.api_key = api_key or os.getenv("PROJECTX_API_KEY", "")
+        self.rate_limiter = TopStepXRateLimiter()
+        self.session = requests.Session()
+        
+        # Set default headers
+        self.session.headers.update({
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        })
+        
+        # Add auth header if API key provided
+        if self.api_key:
+            self.session.headers.update({
+                "Authorization": f"Bearer {self.api_key}"
+            })
     
-    def _make_request(self, endpoint: str, data: Optional[Dict] = None) -> Dict:
-        """Make API request with retry logic and error handling."""
+    def _make_request(self, method: str, endpoint: str, data: Optional[Dict] = None, 
+                     use_read_bucket: bool = True) -> Dict[str, Any]:
+        """Make HTTP request with rate limiting."""
         url = f"{self.base_url}{endpoint}"
         
-        # Apply rate limiting based on endpoint
-        bucket = "bars" if endpoint == "/api/History/retrieveBars" else "general"
-        self.ratelimiter.consume(bucket)
+        # Acquire rate limit token
+        if use_read_bucket:
+            if not self.rate_limiter.acquire_general(timeout=10.0):
+                raise Exception("Rate limit exceeded for read operations")
+        else:
+            if not self.rate_limiter.acquire_emergency(timeout=10.0):
+                raise Exception("Rate limit exceeded for trade operations")
         
-        for attempt in range(self.max_retries + 1):
-            try:
-                session = self.auth.get_session()
-                response = session.post(url, json=data, timeout=self.timeout)
-                
-                if response.status_code == 200:
-                    return response.json()
-                elif response.status_code == 401:
-                    self.logger.warning("401 Unauthorized. Validating token...")
-                    if self.auth.validate_token():
-                        continue
-                    self.logger.warning("Validate failed. Re-authenticating via API key...")
-                    if self.auth.refresh_token():
-                        continue
-                    self.logger.error("Auth recovery failed")
-                    raise ProjectXError("Authentication failed after retry attempts", 401)
-                elif response.status_code == 429:
-                    wait_time = 2 ** attempt
-                    self.logger.warning(f"Rate limited, waiting {wait_time}s")
-                    time.sleep(wait_time)
-                    continue
-                elif response.status_code >= 500:
-                    wait_time = 2 ** attempt
-                    self.logger.warning(f"Server error {response.status_code}, retrying in {wait_time}s")
-                    time.sleep(wait_time)
-                    continue
-                else:
-                    error_msg = f"API request failed: {response.status_code} - {response.text}"
-                    self.logger.error(error_msg)
-                    raise ProjectXError(error_msg, response.status_code, response.json() if response.text else None)
-                    
-            except requests.exceptions.Timeout:
-                self.logger.warning(f"Request timeout on attempt {attempt + 1}")
-                if attempt < self.max_retries:
-                    time.sleep(2 ** attempt)
-                    continue
-                else:
-                    raise ProjectXError("Request timed out after all retries")
-            except ProjectXError:
-                raise
-            except Exception as e:
-                self.logger.error(f"Request error: {e}")
-                raise ProjectXError(f"Request failed: {e}")
-        
-        raise ProjectXError("Request failed after all retry attempts")
-    
-    # Account Management
-    def get_accounts(self, only_active: bool = True) -> List[Dict]:
-        """Get list of trading accounts."""
-        data = {"onlyActiveAccounts": only_active}
-        response = self._make_request("/api/Account/search", data=data)
-        if response and response.get("success"):
-            return response.get("accounts", [])
-        return []
-    
-    # Position Management
-    def get_open_positions(self, account_id: str) -> List[Dict]:
-        """Get open positions for account."""
-        data = {"accountId": int(account_id)}
-        response = self._make_request("/api/Position/search", data=data)
-        if response and response.get("success"):
-            return response.get("positions", [])
-        return []
-    
-    def get_positions(self, account_id: str) -> List[Dict]:
-        """Get positions for account (alias for get_open_positions)."""
-        return self.get_open_positions(account_id)
-    
-    def close_position(self, account_id: str, contract_id: str) -> Dict:
-        """Close a specific position."""
-        data = {"accountId": int(account_id), "contractId": contract_id}
-        return self._make_request("/api/Position/closeContract", data=data)
-    
-    # Order Management
-    def get_open_orders(self, account_id: str) -> List[Dict]:
-        """Get pending orders for account."""
-        data = {"accountId": int(account_id)}
-        response = self._make_request("/api/Order/searchOpen", data=data)
-        if response and response.get("success"):
-            return response.get("orders", [])
-        return []
-    
-    def get_orders(self, account_id: str) -> List[Dict]:
-        """Get orders for account (alias for get_open_orders)."""
-        return self.get_open_orders(account_id)
-    
-    def place_order(self, account_id: str, contract_id: str, order_type: int, side: int, size: int,
-                   limit_price: Optional[float] = None, stop_price: Optional[float] = None,
-                   trail_price: Optional[float] = None, custom_tag: Optional[str] = None,
-                   linked_order_id: Optional[int] = None) -> Dict:
-        """Place a new order with proper parameters."""
-        data = {
-            "accountId": int(account_id), "contractId": contract_id, "type": order_type,
-            "side": side, "size": size, "limitPrice": limit_price, "stopPrice": stop_price,
-            "trailPrice": trail_price, "customTag": custom_tag, "linkedOrderId": linked_order_id
-        }
-        return self._make_request("/api/Order/place", data=data)
-    
-    def cancel_order(self, account_id: str, order_id: str) -> Dict:
-        """Cancel a specific order."""
-        data = {"accountId": int(account_id), "orderId": int(order_id)}
-        return self._make_request("/api/Order/cancel", data=data)
-    
-    def cancel_orders(self, account_id: str, symbol: Optional[str] = None) -> Dict[str, Any]:
-        """Cancel all orders for account or symbol."""
         try:
-            orders = self.get_open_orders(account_id)
-            if symbol:
-                orders = [o for o in orders if o.get("contractId") == symbol]
-            
-            cancelled = 0
-            for order in orders:
-                order_id = order.get("id")
-                if order_id:
-                    self.cancel_order(account_id, str(order_id))
-                    cancelled += 1
-            
-            return {"status": "success", "cancelled_count": cancelled}
-        except Exception as e:
-            return {"status": "error", "error": str(e)}
-    
-    def place_market(self, account_id: str, symbol: str, qty: float, side: str) -> Dict[str, Any]:
-        """Place a market order."""
-        try:
-            order_type = 2  # market
-            side_int = 0 if side.lower() == "buy" else 1  # 0=buy, 1=sell
-            
-            result = self.place_order(
-                account_id=account_id,
-                contract_id=symbol,
-                order_type=order_type,
-                side=side_int,
-                size=int(qty)
+            response = self.session.request(
+                method=method,
+                url=url,
+                json=data,
+                timeout=30
             )
-            return {"status": "success", "order": result}
-        except Exception as e:
-            return {"status": "error", "error": str(e)}
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logger.error(f"API request failed: {e}")
+            raise
     
-    def get_day_pnl(self, account_id: str) -> float:
-        """Get day P&L from trades."""
+    def simulator(self) -> bool:
+        """Check if simulator mode is enabled."""
+        return os.getenv("PX_SIM", "0") == "1"
+    
+    def _get_mock_positions(self, account_id: str) -> List[Dict[str, Any]]:
+        """Generate deterministic mock positions."""
+        return [
+            {
+                "positionId": "pos_001",
+                "accountId": account_id,
+                "contractId": "ESZ24",
+                "side": "LONG",
+                "size": 2,
+                "averagePrice": 4500.50,
+                "creationTimestamp": "2024-01-15T09:30:00Z",
+                "lastUpdated": "2024-01-15T14:30:00Z"
+            },
+            {
+                "positionId": "pos_002", 
+                "accountId": account_id,
+                "contractId": "NQZ24",
+                "side": "SHORT",
+                "size": 1,
+                "averagePrice": 16500.25,
+                "creationTimestamp": "2024-01-15T10:15:00Z",
+                "lastUpdated": "2024-01-15T14:30:00Z"
+            }
+        ]
+    
+    def _get_mock_orders(self, account_id: str) -> List[Dict[str, Any]]:
+        """Generate deterministic mock orders."""
+        return [
+            {
+                "orderId": "ord_001",
+                "accountId": account_id,
+                "contractId": "ESZ24",
+                "symbolId": "ES",
+                "status": "OPEN",
+                "orderType": "LIMIT",
+                "side": "BUY",
+                "size": 1,
+                "limitPrice": 4501.00,
+                "fillVolume": 0,
+                "creationTimestamp": "2024-01-15T14:25:00Z",
+                "updateTimestamp": "2024-01-15T14:25:00Z"
+            },
+            {
+                "orderId": "ord_002",
+                "accountId": account_id,
+                "contractId": "NQZ24", 
+                "symbolId": "NQ",
+                "status": "FILLED",
+                "orderType": "MARKET",
+                "side": "SELL",
+                "size": 1,
+                "fillVolume": 1,
+                "filledPrice": 16500.25,
+                "creationTimestamp": "2024-01-15T10:15:00Z",
+                "updateTimestamp": "2024-01-15T10:15:05Z"
+            }
+        ]
+    
+    def _map_position_payload(self, payload: Dict[str, Any]) -> Position:
+        """Map API payload to Position dataclass."""
+        return Position(
+            position_id=payload["positionId"],
+            account_id=payload["accountId"],
+            contract_id=payload["contractId"],
+            side=PositionSide.LONG if payload["side"] == "LONG" else PositionSide.SHORT,
+            size=payload["size"],
+            average_price=payload["averagePrice"],
+            creation_timestamp=datetime.fromisoformat(payload["creationTimestamp"].replace("Z", "+00:00")),
+            last_updated=datetime.fromisoformat(payload["lastUpdated"].replace("Z", "+00:00"))
+        )
+    
+    def _map_order_payload(self, payload: Dict[str, Any]) -> Order:
+        """Map API payload to Order dataclass."""
+        status_map = {
+            "OPEN": OrderStatus.OPEN,
+            "FILLED": OrderStatus.FILLED,
+            "CANCELLED": OrderStatus.CANCELLED,
+            "REJECTED": OrderStatus.REJECTED
+        }
+        
+        type_map = {
+            "MARKET": OrderType.MARKET,
+            "LIMIT": OrderType.LIMIT,
+            "STOP": OrderType.STOP
+        }
+        
+        side_map = {
+            "BUY": OrderSide.BUY,
+            "SELL": OrderSide.SELL
+        }
+        
+        return Order(
+            order_id=payload["orderId"],
+            account_id=payload["accountId"],
+            contract_id=payload["contractId"],
+            symbol_id=payload["symbolId"],
+            status=status_map.get(payload["status"], OrderStatus.OPEN),
+            order_type=type_map.get(payload["orderType"], OrderType.MARKET),
+            side=side_map.get(payload["side"], OrderSide.BUY),
+            size=payload["size"],
+            limit_price=payload.get("limitPrice"),
+            stop_price=payload.get("stopPrice"),
+            fill_volume=payload.get("fillVolume", 0),
+            filled_price=payload.get("filledPrice"),
+            creation_timestamp=datetime.fromisoformat(payload["creationTimestamp"].replace("Z", "+00:00")),
+            update_timestamp=datetime.fromisoformat(payload["updateTimestamp"].replace("Z", "+00:00"))
+        )
+    
+    @topstepx_rate_limited(endpoint_type="general")
+    @exponential_backoff(max_retries=3, base_delay=1.0)
+    def get_positions(self, account_id: str) -> List[Position]:
+        """Get positions for account."""
+        if self.simulator():
+            logger.info("Using mock positions data")
+            mock_data = self._get_mock_positions(account_id)
+            return [self._map_position_payload(pos) for pos in mock_data]
+        
         try:
-            from datetime import date
-            today = date.today().isoformat()
-            trades = self.get_trades(account_id, start_timestamp=today)
-            
-            total_pnl = 0.0
-            for trade in trades:
-                pnl = trade.get("realizedPnl", 0)
-                if pnl is not None:
-                    total_pnl += float(pnl)
-            
-            return total_pnl
+            response = self._make_request("GET", f"/api/positions/{account_id}", use_read_bucket=True)
+            positions = response.get("positions", [])
+            return [self._map_position_payload(pos) for pos in positions]
         except Exception as e:
-            self.logger.error(f"Error getting day P&L for {account_id}: {e}")
+            logger.error(f"Failed to get positions: {e}")
+            return []
+    
+    @topstepx_rate_limited(endpoint_type="general")
+    @exponential_backoff(max_retries=3, base_delay=1.0)
+    def get_orders(self, account_id: str) -> List[Order]:
+        """Get orders for account."""
+        if self.simulator():
+            logger.info("Using mock orders data")
+            mock_data = self._get_mock_orders(account_id)
+            return [self._map_order_payload(order) for order in mock_data]
+        
+        try:
+            response = self._make_request("GET", f"/api/orders/{account_id}", use_read_bucket=True)
+            orders = response.get("orders", [])
+            return [self._map_order_payload(order) for order in orders]
+        except Exception as e:
+            logger.error(f"Failed to get orders: {e}")
+            return []
+    
+    @topstepx_rate_limited(endpoint_type="general")
+    @exponential_backoff(max_retries=3, base_delay=1.0)
+    def get_day_pnl(self, account_id: str) -> float:
+        """Get daily P&L for account."""
+        if self.simulator():
+            logger.info("Using mock P&L data")
+            return 1250.75  # Deterministic mock value
+        
+        try:
+            response = self._make_request("GET", f"/api/pnl/{account_id}/daily", use_read_bucket=True)
+            return response.get("pnl", 0.0)
+        except Exception as e:
+            logger.error(f"Failed to get daily P&L: {e}")
             return 0.0
     
-    def get_trades(self, account_id: str, start_timestamp: str = None, end_timestamp: str = None) -> List[Dict]:
-        """Get trade history for account."""
-        data = {"accountId": int(account_id)}
-        if start_timestamp:
-            data["startTimestamp"] = start_timestamp
-        if end_timestamp:
-            data["endTimestamp"] = end_timestamp
+    @topstepx_rate_limited(endpoint_type="emergency")
+    @exponential_backoff(max_retries=3, base_delay=1.0)
+    def cancel_orders(self, account_id: str, symbol: Optional[str] = None) -> Dict[str, Any]:
+        """Cancel orders for account."""
+        if self.simulator():
+            logger.info("Using mock cancel response")
+            return {"status": "ok", "cancelled": 2, "message": "Orders cancelled successfully"}
         
-        response = self._make_request("/api/Trade/search", data=data)
-        if response and response.get("success"):
-            return response.get("trades", [])
-        return []
-    
-    # Market Data
-    def get_market_data_bars(self, contract_id: str, start_time: str, end_time: str,
-                            unit: int = 2, unit_number: int = 1, live: bool = False,
-                            limit: Optional[int] = None, include_partial_bar: bool = False) -> List[Dict]:
-        """Get market data bars for contract."""
-        data = {
-            "contractId": contract_id, "live": live, "startTime": start_time, "endTime": end_time,
-            "unit": unit, "unitNumber": unit_number, "includePartialBar": include_partial_bar
-        }
-        if limit is not None:
-            data["limit"] = int(limit)
-        
-        response = self._make_request("/api/History/retrieveBars", data=data)
-        if response and response.get("success"):
-            return response.get("bars", [])
-        return []
-    
-    # System Status
-    def test_connection(self) -> bool:
-        """Test API connection."""
         try:
-            result = self.get_accounts()
-            return len(result) >= 0
-        except ProjectXError:
-            return False
+            data = {"accountId": account_id}
+            if symbol:
+                data["symbol"] = symbol
+            
+            response = self._make_request("POST", "/api/orders/cancel", data=data, use_read_bucket=False)
+            return response
+        except Exception as e:
+            logger.error(f"Failed to cancel orders: {e}")
+            return {"status": "error", "message": str(e)}
+    
+    @topstepx_rate_limited(endpoint_type="emergency")
+    @exponential_backoff(max_retries=3, base_delay=1.0)
+    def place_market(self, account_id: str, symbol: str, qty: float, side: str) -> Dict[str, Any]:
+        """Place market order."""
+        if self.simulator():
+            logger.info("Using mock order placement response")
+            return {
+                "status": "ok",
+                "orderId": f"mock_ord_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                "message": "Market order placed successfully"
+            }
+        
+        try:
+            data = {
+                "accountId": account_id,
+                "symbol": symbol,
+                "quantity": qty,
+                "side": side.upper(),
+                "orderType": "MARKET"
+            }
+            
+            response = self._make_request("POST", "/api/orders/place", data=data, use_read_bucket=False)
+            return response
+        except Exception as e:
+            logger.error(f"Failed to place market order: {e}")
+            return {"status": "error", "message": str(e)}
