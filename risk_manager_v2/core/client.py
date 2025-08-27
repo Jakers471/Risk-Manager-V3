@@ -10,6 +10,14 @@ from typing import Dict, List, Optional, Any
 from .config import ConfigStore
 from .auth import AuthManager
 from .logger import get_logger
+from utils.rate_limiter import TopStepXRateLimiter
+
+class ProjectXError(Exception):
+    """Custom exception for ProjectX API errors."""
+    def __init__(self, message: str, status_code: Optional[int] = None, response_data: Optional[Dict] = None):
+        super().__init__(message)
+        self.status_code = status_code
+        self.response_data = response_data
 
 class ProjectXClient:
     """TopStepX API client with rate limiting and error handling."""
@@ -21,6 +29,7 @@ class ProjectXClient:
         self.base_url = config.get_api_url()
         self.max_retries = config.get("api.max_retries", 3)
         self.timeout = config.get("api.timeout", 30)
+        self.ratelimiter = TopStepXRateLimiter()
     
     def _make_request(
         self, 
@@ -28,10 +37,14 @@ class ProjectXClient:
         endpoint: str, 
         data: Optional[Dict] = None,
         params: Optional[Dict] = None
-    ) -> Optional[Dict]:
+    ) -> Dict:
         """Make API request with retry logic and error handling."""
         
         url = f"{self.base_url}{endpoint}"
+        
+        # Apply rate limiting based on endpoint
+        bucket = "bars" if endpoint == "/api/History/retrieveBars" else "general"
+        self.ratelimiter.consume(bucket)
         
         for attempt in range(self.max_retries + 1):
             try:
@@ -52,13 +65,14 @@ class ProjectXClient:
                 if response.status_code == 200:
                     return response.json()
                 elif response.status_code == 401:
-                    self.logger.warning("Authentication failed, attempting token validation")
-                    # Try to validate/refresh token first
+                    self.logger.warning("401 Unauthorized. Validating token...")
+                    if self.auth.validate_token():
+                        continue
+                    self.logger.warning("Validate failed. Re-authenticating via API key...")
                     if self.auth.refresh_token():
                         continue
-                    else:
-                        self.logger.error("Token validation failed, re-authentication required")
-                        return None
+                    self.logger.error("Auth recovery failed")
+                    raise ProjectXError("Authentication failed after retry attempts", 401)
                 elif response.status_code == 429:
                     wait_time = 2 ** attempt
                     self.logger.warning(f"Rate limited, waiting {wait_time}s")
@@ -70,8 +84,9 @@ class ProjectXClient:
                     time.sleep(wait_time)
                     continue
                 else:
-                    self.logger.error(f"API request failed: {response.status_code} - {response.text}")
-                    return None
+                    error_msg = f"API request failed: {response.status_code} - {response.text}"
+                    self.logger.error(error_msg)
+                    raise ProjectXError(error_msg, response.status_code, response.json() if response.text else None)
                     
             except requests.exceptions.Timeout:
                 self.logger.warning(f"Request timeout on attempt {attempt + 1}")
@@ -79,22 +94,23 @@ class ProjectXClient:
                     time.sleep(2 ** attempt)
                     continue
                 else:
-                    self.logger.error("Request timed out after all retries")
-                    return None
+                    raise ProjectXError("Request timed out after all retries")
+            except ProjectXError:
+                raise
             except Exception as e:
                 self.logger.error(f"Request error: {e}")
-                return None
+                raise ProjectXError(f"Request failed: {e}")
         
-        return None
+        raise ProjectXError("Request failed after all retry attempts")
     
     # Account Management
-    def get_accounts(self, only_active: bool = True) -> Optional[List[Dict]]:
+    def get_accounts(self, only_active: bool = True) -> List[Dict]:
         """Get list of trading accounts."""
         data = {"onlyActiveAccounts": only_active}
         response = self._make_request("POST", "/api/Account/search", data=data)
         if response and response.get("success"):
             return response.get("accounts", [])
-        return None
+        return []
     
     def get_account_details(self, account_id: str) -> Optional[Dict]:
         """Get detailed account information."""
@@ -117,15 +133,15 @@ class ProjectXClient:
         return None
     
     # Position Management
-    def get_open_positions(self, account_id: str) -> Optional[List[Dict]]:
+    def get_open_positions(self, account_id: str) -> List[Dict]:
         """Get open positions for account."""
         data = {"accountId": int(account_id)}
         response = self._make_request("POST", "/api/Position/searchOpen", data=data)
         if response and response.get("success"):
             return response.get("positions", [])
-        return None
+        return []
     
-    def close_position(self, account_id: str, contract_id: str) -> Optional[Dict]:
+    def close_position(self, account_id: str, contract_id: str) -> Dict:
         """Close a specific position."""
         data = {
             "accountId": int(account_id),
@@ -133,7 +149,7 @@ class ProjectXClient:
         }
         return self._make_request("POST", "/api/Position/closeContract", data=data)
     
-    def close_partial_position(self, account_id: str, contract_id: str, size: int) -> Optional[Dict]:
+    def close_partial_position(self, account_id: str, contract_id: str, size: int) -> Dict:
         """Close a partial position."""
         data = {
             "accountId": int(account_id),
@@ -142,32 +158,59 @@ class ProjectXClient:
         }
         return self._make_request("POST", "/api/Position/partialCloseContract", data=data)
     
-    def close_all_positions(self, account_id: str) -> Optional[Dict]:
-        """Close all positions for account."""
-        # Get all positions first, then close each one
-        positions = self.get_open_positions(account_id)
-        if not positions:
-            return {"success": True, "message": "No positions to close"}
-        
-        results = []
-        for position in positions:
-            contract_id = position.get("contractId")
-            if contract_id:
-                result = self.close_position(account_id, contract_id)
-                results.append(result)
-        
-        return {"success": True, "closed_positions": results}
+    def close_all_positions(self, account_id: str) -> Dict:
+        """Close all positions for account (idempotent)."""
+        try:
+            # Get all positions first, then close each one
+            positions = self.get_open_positions(account_id)
+            if not positions:
+                return {"success": True, "message": "No positions to close", "closed_count": 0}
+            
+            results = []
+            closed_count = 0
+            for position in positions:
+                contract_id = position.get("contractId")
+                if contract_id:
+                    try:
+                        result = self.close_position(account_id, contract_id)
+                        results.append(result)
+                        closed_count += 1
+                    except ProjectXError as e:
+                        self.logger.warning(f"Failed to close position {contract_id}: {e}")
+                        results.append({"error": str(e), "contract_id": contract_id})
+            
+            return {
+                "success": True, 
+                "closed_count": closed_count,
+                "total_positions": len(positions),
+                "results": results
+            }
+        except ProjectXError:
+            raise
+        except Exception as e:
+            raise ProjectXError(f"Failed to close all positions: {e}")
     
     # Order Management
-    def get_open_orders(self, account_id: str) -> Optional[List[Dict]]:
+    def get_open_orders(self, account_id: str) -> List[Dict]:
         """Get pending orders for account."""
         data = {"accountId": int(account_id)}
         response = self._make_request("POST", "/api/Order/searchOpen", data=data)
         if response and response.get("success"):
             return response.get("orders", [])
-        return None
+        return []
     
-    def get_orders(self, account_id: str, start_timestamp: str = None, end_timestamp: str = None) -> Optional[List[Dict]]:
+    def search_orders(self, account_id: str, start_timestamp: str, end_timestamp: Optional[str] = None) -> List[Dict]:
+        """Get all orders for account within time range (including filled/cancelled)."""
+        data = {"accountId": int(account_id), "startTimestamp": start_timestamp}
+        if end_timestamp:
+            data["endTimestamp"] = end_timestamp
+        
+        response = self._make_request("POST", "/api/Order/search", data=data)
+        if response and response.get("success"):
+            return response.get("orders", [])
+        return []
+    
+    def get_orders(self, account_id: str, start_timestamp: str = None, end_timestamp: str = None) -> List[Dict]:
         """Get all orders for account (including filled/cancelled)."""
         data = {"accountId": int(account_id)}
         if start_timestamp:
@@ -178,7 +221,7 @@ class ProjectXClient:
         response = self._make_request("POST", "/api/Order/search", data=data)
         if response and response.get("success"):
             return response.get("orders", [])
-        return None
+        return []
     
     def place_order(
         self, 
@@ -192,7 +235,7 @@ class ProjectXClient:
         trail_price: Optional[float] = None,
         custom_tag: Optional[str] = None,
         linked_order_id: Optional[int] = None
-    ) -> Optional[Dict]:
+    ) -> Dict:
         """Place a new order with proper parameters."""
         data = {
             "accountId": int(account_id),
@@ -208,7 +251,7 @@ class ProjectXClient:
         }
         return self._make_request("POST", "/api/Order/place", data=data)
     
-    def cancel_order(self, account_id: str, order_id: str) -> Optional[Dict]:
+    def cancel_order(self, account_id: str, order_id: str) -> Dict:
         """Cancel a specific order."""
         data = {
             "accountId": int(account_id),
@@ -216,23 +259,39 @@ class ProjectXClient:
         }
         return self._make_request("POST", "/api/Order/cancel", data=data)
     
-    def cancel_all_orders(self, account_id: str) -> Optional[Dict]:
-        """Cancel all orders for account."""
-        orders = self.get_open_orders(account_id)
-        if not orders:
-            return {"success": True, "message": "No orders to cancel"}
-        
-        results = []
-        for order in orders:
-            order_id = order.get("id")  # Changed from "orderId" to "id" to match API response
-            if order_id:
-                result = self.cancel_order(account_id, str(order_id))
-                results.append(result)
-        
-        return {"success": True, "cancelled_orders": results}
+    def cancel_all_orders(self, account_id: str) -> Dict:
+        """Cancel all orders for account (idempotent)."""
+        try:
+            orders = self.get_open_orders(account_id)
+            if not orders:
+                return {"success": True, "message": "No orders to cancel", "cancelled_count": 0}
+            
+            results = []
+            cancelled_count = 0
+            for order in orders:
+                order_id = order.get("id")
+                if order_id:
+                    try:
+                        result = self.cancel_order(account_id, str(order_id))
+                        results.append(result)
+                        cancelled_count += 1
+                    except ProjectXError as e:
+                        self.logger.warning(f"Failed to cancel order {order_id}: {e}")
+                        results.append({"error": str(e), "order_id": order_id})
+            
+            return {
+                "success": True, 
+                "cancelled_count": cancelled_count,
+                "total_orders": len(orders),
+                "results": results
+            }
+        except ProjectXError:
+            raise
+        except Exception as e:
+            raise ProjectXError(f"Failed to cancel all orders: {e}")
     
     # Trade History
-    def get_trades(self, account_id: str, start_timestamp: str = None, end_timestamp: str = None) -> Optional[List[Dict]]:
+    def get_trades(self, account_id: str, start_timestamp: str = None, end_timestamp: str = None) -> List[Dict]:
         """Get trade history for account."""
         data = {"accountId": int(account_id)}
         if start_timestamp:
@@ -243,18 +302,18 @@ class ProjectXClient:
         response = self._make_request("POST", "/api/Trade/search", data=data)
         if response and response.get("success"):
             return response.get("trades", [])
-        return None
+        return []
     
     # Contract Information
-    def get_available_contracts(self, live: bool = True) -> Optional[List[Dict]]:
+    def get_available_contracts(self, live: bool = True) -> List[Dict]:
         """Get available contracts."""
         data = {"live": live}
         response = self._make_request("POST", "/api/Contract/available", data=data)
         if response and response.get("success"):
             return response.get("contracts", [])
-        return None
+        return []
     
-    def search_contracts(self, search_text: str = "", live: bool = True) -> Optional[List[Dict]]:
+    def search_contracts(self, search_text: str = "", live: bool = True) -> List[Dict]:
         """Search for contracts by symbol."""
         data = {
             "searchText": search_text,
@@ -263,7 +322,7 @@ class ProjectXClient:
         response = self._make_request("POST", "/api/Contract/search", data=data)
         if response and response.get("success"):
             return response.get("contracts", [])
-        return None
+        return []
     
     def get_contract_details(self, contract_id: str) -> Optional[Dict]:
         """Get detailed contract information."""
@@ -283,7 +342,7 @@ class ProjectXClient:
         live: bool = False,
         limit: Optional[int] = None,
         include_partial_bar: bool = False
-    ) -> Optional[List[Dict]]:
+    ) -> List[Dict]:
         """Get market data bars for contract."""
         data = {
             "contractId": contract_id,
@@ -300,14 +359,17 @@ class ProjectXClient:
         response = self._make_request("POST", "/api/History/retrieveBars", data=data)
         if response and response.get("success"):
             return response.get("bars", [])
-        return None
+        return []
     
     # System Status
     def test_connection(self) -> bool:
         """Test API connection."""
-        # Try to get accounts as a connectivity test
-        result = self.get_accounts()
-        return result is not None
+        try:
+            # Try to get accounts as a connectivity test
+            result = self.get_accounts()
+            return len(result) >= 0  # Success if we get a response (even empty list)
+        except ProjectXError:
+            return False
 
 if __name__ == "__main__":
     print("Testing ProjectXClient...")
