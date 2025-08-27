@@ -145,3 +145,7 @@ config/local_settings.json
 # OS
 .DS_Store
 Thumbs.db
+
+runtime/
+runtime/queues/
+
