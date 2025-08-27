@@ -1,4 +1,4 @@
-"""
+﻿"""
 Positions View Menu
 
 Handles viewing open positions and position details.
@@ -18,7 +18,7 @@ class PositionsViewMenu(BaseMenu):
         print("\n=== OPEN POSITIONS ===")
         
         if not self.auth.is_authenticated():
-            print("❌ Not authenticated")
+            print("âŒ Not authenticated")
             return
         
         account_id = input("Enter Account ID: ").strip()
@@ -80,11 +80,13 @@ if __name__ == "__main__":
     
     # Test basic initialization
     positions_view = PositionsViewMenu()
-    print("✅ PositionsViewMenu created successfully!")
+    print("âœ… PositionsViewMenu created successfully!")
     
     # Test display positions (will fail without auth, but should not crash)
     try:
         positions_view.view_positions()
-        print("✅ PositionsViewMenu test completed!")
+        print("âœ… PositionsViewMenu test completed!")
     except Exception as e:
-        print(f"✅ PositionsViewMenu test completed (expected error without auth): {e}")
+        print(f"âœ… PositionsViewMenu test completed (expected error without auth): {e}")
+
+

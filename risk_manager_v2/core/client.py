@@ -1,4 +1,4 @@
-"""
+﻿"""
 TopStepX API Client
 
 Handles all API communication with the TopStepX Gateway.
@@ -10,7 +10,7 @@ from typing import Dict, List, Optional, Any
 from .config import ConfigStore
 from .auth import AuthManager
 from .logger import get_logger
-from utils.rate_limiter import TopStepXRateLimiter
+from risk_manager_v2.utils.rate_limiter import TopStepXRateLimiter
 
 class ProjectXError(Exception):
     """Custom exception for ProjectX API errors."""
@@ -375,19 +375,23 @@ if __name__ == "__main__":
     print("Testing ProjectXClient...")
     
     # Test basic initialization
-    from core.config import ConfigStore
-    from core.auth import AuthManager
+    from risk_manager_v2.core.config import ConfigStore
+    from risk_manager_v2.core.auth import AuthManager
     
     config = ConfigStore()
     auth = AuthManager(config)
     client = ProjectXClient(config, auth)
-    print("✅ ProjectXClient created successfully!")
+    print("âœ… ProjectXClient created successfully!")
     
     # Test connection (will fail without auth, but should not crash)
     try:
         connection_test = client.test_connection()
-        print(f"✅ Connection test completed: {connection_test}")
+        print(f"âœ… Connection test completed: {connection_test}")
     except Exception as e:
-        print(f"✅ Connection test failed as expected (no auth): {e}")
+        print(f"âœ… Connection test failed as expected (no auth): {e}")
     
-    print("✅ ProjectXClient test completed!")
+    print("âœ… ProjectXClient test completed!")
+
+
+
+

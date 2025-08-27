@@ -1,4 +1,4 @@
-"""
+﻿"""
 Risk Rules Router
 
 Routes to different rule configuration modules.
@@ -155,10 +155,10 @@ class RulesMenu(BaseMenu):
             # Show rule module status
             print("\nRule Module Status:")
             print("-" * 40)
-            print(f"  Daily Rules: {'✅ Available' if self.daily_rules else '❌ Not implemented'}")
-            print(f"  Position Rules: {'✅ Available' if self.position_rules else '❌ Not implemented'}")
-            print(f"  Hours Rules: {'✅ Available' if self.hours_rules else '❌ Not implemented'}")
-            print(f"  Session Rules: {'✅ Available' if self.session_rules else '❌ Not implemented'}")
+            print(f"  Daily Rules: {'âœ… Available' if self.daily_rules else 'âŒ Not implemented'}")
+            print(f"  Position Rules: {'âœ… Available' if self.position_rules else 'âŒ Not implemented'}")
+            print(f"  Hours Rules: {'âœ… Available' if self.hours_rules else 'âŒ Not implemented'}")
+            print(f"  Session Rules: {'âœ… Available' if self.session_rules else 'âŒ Not implemented'}")
             
         except Exception as e:
             self.logger.error(f"Error viewing rules: {e}")
@@ -171,8 +171,10 @@ if __name__ == "__main__":
     
     # Test basic initialization
     rules = RulesMenu()
-    print("✅ RulesMenu created successfully!")
+    print("âœ… RulesMenu created successfully!")
     
     # Test display menu
     rules.display_menu()
-    print("✅ RulesMenu test completed!")
+    print("âœ… RulesMenu test completed!")
+
+

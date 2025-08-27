@@ -1,4 +1,4 @@
-"""
+﻿"""
 Rate limiting utilities for API calls and enforcement actions.
 
 Prevents overwhelming the broker API and ensures compliance with rate limits.
@@ -8,7 +8,7 @@ import time
 import threading
 from collections import deque
 from typing import Optional, Callable, Dict, Any
-from core.logger import get_logger
+from risk_manager_v2.core.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -275,35 +275,37 @@ if __name__ == "__main__":
     
     # Test basic rate limiter
     limiter = RateLimiter(max_tokens=10, refill_rate=1, refill_time=1.0)
-    print("✅ Basic RateLimiter created successfully!")
+    print("âœ… Basic RateLimiter created successfully!")
     
     # Test TopStepX rate limiter
     topstepx_limiter = TopStepXRateLimiter()
-    print("✅ TopStepX RateLimiter created successfully!")
+    print("âœ… TopStepX RateLimiter created successfully!")
     
     # Test action rate limiter
     action_limiter = ActionRateLimiter(max_actions_per_minute=100)
-    print("✅ Action RateLimiter created successfully!")
+    print("âœ… Action RateLimiter created successfully!")
     
     # Test rate limiting decorator
     @rate_limited(max_calls=5, time_window=10.0)
     def test_function():
         return "Function executed successfully"
     
-    print("✅ Rate limiting decorator created successfully!")
+    print("âœ… Rate limiting decorator created successfully!")
     
     # Test TopStepX rate limiting decorator
     @topstepx_rate_limited(endpoint_type="general")
     def test_api_call():
         return "API call executed successfully"
     
-    print("✅ TopStepX rate limiting decorator created successfully!")
+    print("âœ… TopStepX rate limiting decorator created successfully!")
     
     # Test exponential backoff decorator
     @exponential_backoff(max_retries=2, base_delay=0.1)
     def test_retry_function():
         return "Retry function executed successfully"
     
-    print("✅ Exponential backoff decorator created successfully!")
+    print("âœ… Exponential backoff decorator created successfully!")
     
-    print("✅ RateLimiter test completed!")
+    print("âœ… RateLimiter test completed!")
+
+

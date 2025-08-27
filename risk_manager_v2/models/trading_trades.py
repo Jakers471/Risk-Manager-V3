@@ -1,4 +1,4 @@
-"""
+﻿"""
 Trading Trades Data Model
 
 Handles trade information and management.
@@ -153,17 +153,19 @@ if __name__ == "__main__":
         profit_and_loss=50.0,
         fees=2.50
     )
-    print("✅ Trade created successfully!")
+    print("âœ… Trade created successfully!")
     
     # Test validation
     try:
         trade.validate()
-        print("✅ Trade validation passed!")
+        print("âœ… Trade validation passed!")
     except ValueError as e:
-        print(f"❌ Trade validation failed: {e}")
+        print(f"âŒ Trade validation failed: {e}")
     
     # Test trade info
     info = trade.get_trade_info()
-    print(f"✅ Trade info: {info}")
+    print(f"âœ… Trade info: {info}")
     
-    print("✅ Trade model test completed!")
+    print("âœ… Trade model test completed!")
+
+

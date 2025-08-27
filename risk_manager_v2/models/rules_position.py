@@ -1,4 +1,4 @@
-"""
+﻿"""
 Position Limits Rule
 
 Handles position size and risk per trade limits.
@@ -132,22 +132,24 @@ if __name__ == "__main__":
     
     # Test basic initialization
     position_limits = PositionLimits()
-    print("✅ PositionLimits created successfully!")
+    print("âœ… PositionLimits created successfully!")
     
     # Test validation
     try:
         position_limits.validate()
-        print("✅ Validation passed!")
+        print("âœ… Validation passed!")
     except ValueError as e:
-        print(f"❌ Validation failed: {e}")
+        print(f"âŒ Validation failed: {e}")
     
     # Test risk status
     status = position_limits.get_risk_status(5, 3, 250.0)
-    print(f"✅ Risk status: {status}")
+    print(f"âœ… Risk status: {status}")
     
     # Test to_dict/from_dict
     data = position_limits.to_dict()
     restored = PositionLimits.from_dict(data)
-    print(f"✅ Serialization test: {restored.to_dict()}")
+    print(f"âœ… Serialization test: {restored.to_dict()}")
     
-    print("✅ PositionLimits test completed!")
+    print("âœ… PositionLimits test completed!")
+
+

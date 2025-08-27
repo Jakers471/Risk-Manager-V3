@@ -1,4 +1,4 @@
-"""
+﻿"""
 Setup & Authentication Menu
 
 Handles initial setup, authentication, and configuration.
@@ -34,16 +34,16 @@ class SetupMenu(BaseMenu):
         
         # Show current status
         if self.auth.is_authenticated():
-            print("✅ Currently authenticated")
+            print("âœ… Currently authenticated")
             username = self.config.get("auth.userName")
             print(f"   User: {username}")
             
             if self.client.test_connection():
-                print("✅ API connection working")
+                print("âœ… API connection working")
             else:
-                print("❌ API connection failed")
+                print("âŒ API connection failed")
         else:
-            print("❌ Not authenticated")
+            print("âŒ Not authenticated")
         
         print("\nOptions:")
         print("1) Authenticate with TopStepX")
@@ -60,19 +60,19 @@ class SetupMenu(BaseMenu):
         api_key = input("API Key: ").strip()
         
         if not username or not api_key:
-            print("❌ Username and API key are required")
+            print("âŒ Username and API key are required")
             return
         
         print("Authenticating...")
         if self.auth.authenticate(username, api_key):
-            print("✅ Authentication successful!")
+            print("âœ… Authentication successful!")
             
             if self.client.test_connection():
-                print("✅ API connection verified")
+                print("âœ… API connection verified")
             else:
-                print("❌ API connection failed")
+                print("âŒ API connection failed")
         else:
-            print("❌ Authentication failed")
+            print("âŒ Authentication failed")
     
     def test_connection(self):
         """Test API connection."""
@@ -80,11 +80,11 @@ class SetupMenu(BaseMenu):
         
         if self.auth.is_authenticated():
             if self.client.test_connection():
-                print("✅ API connection successful")
+                print("âœ… API connection successful")
             else:
-                print("❌ API connection failed")
+                print("âŒ API connection failed")
         else:
-            print("❌ Not authenticated")
+            print("âŒ Not authenticated")
     
     def view_config(self):
         """View current configuration."""
@@ -128,8 +128,10 @@ if __name__ == "__main__":
     
     # Test basic initialization
     setup = SetupMenu()
-    print("✅ SetupMenu created successfully!")
+    print("âœ… SetupMenu created successfully!")
     
     # Test display menu
     setup.display_menu()
-    print("✅ SetupMenu test completed!")
+    print("âœ… SetupMenu test completed!")
+
+

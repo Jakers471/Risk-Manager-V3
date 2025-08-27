@@ -1,4 +1,4 @@
-"""
+﻿"""
 Configuration Management
 
 Handles loading, saving, and managing application configuration.
@@ -142,6 +142,8 @@ class ConfigStore:
 if __name__ == "__main__":
     print("Testing ConfigStore...")
     config = ConfigStore()
-    print("✅ ConfigStore created successfully!")
+    print("âœ… ConfigStore created successfully!")
     api_url = config.get("api.base_url")
-    print(f"✅ API URL: {api_url}")
+    print(f"âœ… API URL: {api_url}")
+
+

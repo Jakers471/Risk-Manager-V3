@@ -1,4 +1,4 @@
-"""
+﻿"""
 Orders Cancel Menu
 
 Handles canceling orders (single and all).
@@ -36,7 +36,7 @@ class OrdersCancelMenu(BaseMenu):
         print("\n=== CANCEL SINGLE ORDER ===")
         
         if not self.auth.is_authenticated():
-            print("❌ Not authenticated")
+            print("âŒ Not authenticated")
             return
         
         account_id = input("Enter Account ID: ").strip()
@@ -55,10 +55,10 @@ class OrdersCancelMenu(BaseMenu):
             result = self.client.cancel_order(account_id, order_id)
             
             if result and result.get("success"):
-                print("✅ Order cancelled successfully!")
+                print("âœ… Order cancelled successfully!")
             else:
                 error_msg = result.get("errorMessage", "Unknown error") if result else "No response"
-                print(f"❌ Failed to cancel order: {error_msg}")
+                print(f"âŒ Failed to cancel order: {error_msg}")
                 
         except Exception as e:
             self.logger.error(f"Error cancelling order: {e}")
@@ -71,7 +71,7 @@ class OrdersCancelMenu(BaseMenu):
         print("\n=== CANCEL ALL ORDERS ===")
         
         if not self.auth.is_authenticated():
-            print("❌ Not authenticated")
+            print("âŒ Not authenticated")
             return
         
         account_id = input("Enter Account ID: ").strip()
@@ -107,10 +107,10 @@ class OrdersCancelMenu(BaseMenu):
             result = self.client.cancel_all_orders(account_id)
             
             if result and result.get("success"):
-                print("✅ All orders cancelled successfully!")
+                print("âœ… All orders cancelled successfully!")
             else:
                 error_msg = result.get("errorMessage", "Unknown error") if result else "No response"
-                print(f"❌ Failed to cancel all orders: {error_msg}")
+                print(f"âŒ Failed to cancel all orders: {error_msg}")
                 
         except Exception as e:
             self.logger.error(f"Error cancelling all orders: {e}")
@@ -131,8 +131,10 @@ if __name__ == "__main__":
     
     # Test basic initialization
     orders_cancel = OrdersCancelMenu()
-    print("✅ OrdersCancelMenu created successfully!")
+    print("âœ… OrdersCancelMenu created successfully!")
     
     # Test display menu
     orders_cancel.display_menu()
-    print("✅ OrdersCancelMenu test completed!")
+    print("âœ… OrdersCancelMenu test completed!")
+
+

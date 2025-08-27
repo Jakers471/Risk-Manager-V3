@@ -1,0 +1,12 @@
+﻿name: Agent B Task
+description: ProjectX Client / Realtime / Rate Limits
+labels: ["agent-b"]
+body:
+  - type: textarea
+    attributes: { label: Scope, description: Files/paths to touch }
+  - type: textarea
+    attributes: { label: Acceptance criteria }
+  - type: textarea
+    attributes: { label: Out of scope }
+  - type: textarea
+    attributes: { label: Test notes }

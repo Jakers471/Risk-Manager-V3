@@ -1,4 +1,4 @@
-"""
+﻿"""
 Accounts List Menu
 
 Handles listing and viewing account information.
@@ -19,7 +19,7 @@ class AccountsListMenu(BaseMenu):
         print("\n=== ALL ACCOUNTS ===")
         
         if not self.auth.is_authenticated():
-            print("❌ Not authenticated")
+            print("âŒ Not authenticated")
             return
         
         try:
@@ -81,11 +81,13 @@ if __name__ == "__main__":
     
     # Test basic initialization
     accounts_list = AccountsListMenu()
-    print("✅ AccountsListMenu created successfully!")
+    print("âœ… AccountsListMenu created successfully!")
     
     # Test list accounts (will fail without auth, but should not crash)
     try:
         accounts_list.list_accounts()
-        print("✅ AccountsListMenu test completed!")
+        print("âœ… AccountsListMenu test completed!")
     except Exception as e:
-        print(f"✅ AccountsListMenu test completed (expected error without auth): {e}")
+        print(f"âœ… AccountsListMenu test completed (expected error without auth): {e}")
+
+

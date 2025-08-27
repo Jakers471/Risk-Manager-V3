@@ -1,4 +1,4 @@
-"""
+﻿"""
 Utility modules for risk management system.
 
 Provides helper functions, data processing utilities, and common operations
@@ -52,3 +52,5 @@ def get_utils_info():
             'converters.py - Data type conversion utilities'
         ]
     }
+
+

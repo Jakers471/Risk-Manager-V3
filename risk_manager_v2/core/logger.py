@@ -1,4 +1,4 @@
-"""
+﻿"""
 Centralized Logging System
 
 Provides consistent logging across the entire application.
@@ -104,13 +104,13 @@ if __name__ == "__main__":
     
     # Test setup_logging
     logger = setup_logging()
-    print("✅ Logging system setup successfully!")
+    print("âœ… Logging system setup successfully!")
     
     # Test RiskManagerLogger
     risk_logger = RiskManagerLogger("TestLogger")
     risk_logger.info("Test info message")
     risk_logger.warning("Test warning message")
-    print("✅ RiskManagerLogger test completed!")
+    print("âœ… RiskManagerLogger test completed!")
     
     # Test LoggerMixin
     class TestClass(LoggerMixin):
@@ -119,4 +119,6 @@ if __name__ == "__main__":
     
     test_obj = TestClass()
     test_obj.test_method()
-    print("✅ LoggerMixin test completed!")
+    print("âœ… LoggerMixin test completed!")
+
+

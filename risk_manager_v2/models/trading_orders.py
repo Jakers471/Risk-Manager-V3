@@ -1,4 +1,4 @@
-"""
+﻿"""
 Trading Orders Data Model
 
 Handles order information and management.
@@ -185,17 +185,19 @@ if __name__ == "__main__":
         side=OrderSide.BID,
         size=1
     )
-    print("✅ Order created successfully!")
+    print("âœ… Order created successfully!")
     
     # Test validation
     try:
         order.validate()
-        print("✅ Order validation passed!")
+        print("âœ… Order validation passed!")
     except ValueError as e:
-        print(f"❌ Order validation failed: {e}")
+        print(f"âŒ Order validation failed: {e}")
     
     # Test order info
     info = order.get_order_info()
-    print(f"✅ Order info: {info}")
+    print(f"âœ… Order info: {info}")
     
-    print("✅ Order model test completed!")
+    print("âœ… Order model test completed!")
+
+

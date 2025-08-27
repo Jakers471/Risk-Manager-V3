@@ -1,12 +1,12 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Risk Manager V2 - Main Entry Point
 """
 
-from core.config import ConfigStore
-from core.logger import setup_logging
-from core.auth import AuthManager
-from core.client import ProjectXClient
+from risk_manager_v2.core.config import ConfigStore
+from risk_manager_v2.core.logger import setup_logging
+from risk_manager_v2.core.auth import AuthManager
+from risk_manager_v2.core.client import ProjectXClient
 
 def main():
     """Main application entry point."""
@@ -43,8 +43,10 @@ def main():
     except Exception as e:
         logger.warning(f"API connection test failed (expected without auth): {e}")
     
-    print("✅ Main entry point loaded successfully!")
+    print("âœ… Main entry point loaded successfully!")
     logger.info("Main entry point loaded successfully")
 
 if __name__ == "__main__":
     main()
+
+

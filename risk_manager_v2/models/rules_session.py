@@ -1,4 +1,4 @@
-"""
+﻿"""
 Session Rules
 
 Handles session enforcement and auto-flattening configuration.
@@ -126,21 +126,23 @@ if __name__ == "__main__":
     
     # Test basic initialization
     session_rules = SessionRules()
-    print("✅ SessionRules created successfully!")
+    print("âœ… SessionRules created successfully!")
     
     # Test validation
     try:
         session_rules.validate()
-        print("✅ Validation passed!")
+        print("âœ… Validation passed!")
     except ValueError as e:
-        print(f"❌ Validation failed: {e}")
+        print(f"âŒ Validation failed: {e}")
     
     # Test enforcement status
     status = session_rules.get_enforcement_status()
-    print(f"✅ Enforcement status: {status}")
+    print(f"âœ… Enforcement status: {status}")
     
     # Test session info
     info = session_rules.get_session_info()
-    print(f"✅ Session info: {info}")
+    print(f"âœ… Session info: {info}")
     
-    print("✅ SessionRules test completed!")
+    print("âœ… SessionRules test completed!")
+
+

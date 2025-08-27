@@ -1,4 +1,4 @@
-"""
+﻿"""
 Positions Close Menu
 
 Handles closing positions (single, partial, and all).
@@ -39,7 +39,7 @@ class PositionsCloseMenu(BaseMenu):
         print("\n=== CLOSE SINGLE POSITION ===")
         
         if not self.auth.is_authenticated():
-            print("❌ Not authenticated")
+            print("âŒ Not authenticated")
             return
         
         account_id = input("Enter Account ID: ").strip()
@@ -58,10 +58,10 @@ class PositionsCloseMenu(BaseMenu):
             result = self.client.close_position(account_id, contract_id)
             
             if result and result.get("success"):
-                print("✅ Position closed successfully!")
+                print("âœ… Position closed successfully!")
             else:
                 error_msg = result.get("errorMessage", "Unknown error") if result else "No response"
-                print(f"❌ Failed to close position: {error_msg}")
+                print(f"âŒ Failed to close position: {error_msg}")
                 
         except Exception as e:
             self.logger.error(f"Error closing position: {e}")
@@ -74,7 +74,7 @@ class PositionsCloseMenu(BaseMenu):
         print("\n=== CLOSE PARTIAL POSITION ===")
         
         if not self.auth.is_authenticated():
-            print("❌ Not authenticated")
+            print("âŒ Not authenticated")
             return
         
         account_id = input("Enter Account ID: ").strip()
@@ -103,10 +103,10 @@ class PositionsCloseMenu(BaseMenu):
             result = self.client.close_partial_position(account_id, contract_id, size_int)
             
             if result and result.get("success"):
-                print(f"✅ {size_int} contracts closed successfully!")
+                print(f"âœ… {size_int} contracts closed successfully!")
             else:
                 error_msg = result.get("errorMessage", "Unknown error") if result else "No response"
-                print(f"❌ Failed to close position: {error_msg}")
+                print(f"âŒ Failed to close position: {error_msg}")
                 
         except Exception as e:
             self.logger.error(f"Error closing partial position: {e}")
@@ -119,7 +119,7 @@ class PositionsCloseMenu(BaseMenu):
         print("\n=== CLOSE ALL POSITIONS ===")
         
         if not self.auth.is_authenticated():
-            print("❌ Not authenticated")
+            print("âŒ Not authenticated")
             return
         
         account_id = input("Enter Account ID: ").strip()
@@ -153,10 +153,10 @@ class PositionsCloseMenu(BaseMenu):
             result = self.client.close_all_positions(account_id)
             
             if result and result.get("success"):
-                print("✅ All positions closed successfully!")
+                print("âœ… All positions closed successfully!")
             else:
                 error_msg = result.get("errorMessage", "Unknown error") if result else "No response"
-                print(f"❌ Failed to close all positions: {error_msg}")
+                print(f"âŒ Failed to close all positions: {error_msg}")
                 
         except Exception as e:
             self.logger.error(f"Error closing all positions: {e}")
@@ -169,8 +169,10 @@ if __name__ == "__main__":
     
     # Test basic initialization
     positions_close = PositionsCloseMenu()
-    print("✅ PositionsCloseMenu created successfully!")
+    print("âœ… PositionsCloseMenu created successfully!")
     
     # Test display menu
     positions_close.display_menu()
-    print("✅ PositionsCloseMenu test completed!")
+    print("âœ… PositionsCloseMenu test completed!")
+
+

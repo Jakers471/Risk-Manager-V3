@@ -1,0 +1,12 @@
+﻿name: Agent A Task
+description: Engine & Monitor task
+labels: ["agent-a"]
+body:
+  - type: textarea
+    attributes: { label: Scope, description: Files/paths to touch }
+  - type: textarea
+    attributes: { label: Acceptance criteria }
+  - type: textarea
+    attributes: { label: Out of scope }
+  - type: textarea
+    attributes: { label: Test notes }

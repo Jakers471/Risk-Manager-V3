@@ -1,4 +1,4 @@
-"""
+﻿"""
 Structured JSON logging utilities.
 
 Provides structured logging with correlation IDs, idempotency keys, and metrics.
@@ -10,7 +10,7 @@ import time
 import uuid
 from datetime import datetime
 from typing import Any, Dict, Optional, List
-from core.logger import get_logger
+from risk_manager_v2.core.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -361,15 +361,15 @@ if __name__ == "__main__":
     
     # Test JSON formatter
     formatter = JSONFormatter()
-    print("✅ JSONFormatter created successfully!")
+    print("âœ… JSONFormatter created successfully!")
     
     # Test structured logger
     logger = StructuredLogger("test_logger")
-    print("✅ StructuredLogger created successfully!")
+    print("âœ… StructuredLogger created successfully!")
     
     # Test risk logger
     risk_logger = RiskLogger("test_account")
-    print("✅ RiskLogger created successfully!")
+    print("âœ… RiskLogger created successfully!")
     
     # Test logging functions
     logger.log_event("test_event", "INFO", test_data="sample")
@@ -381,10 +381,12 @@ if __name__ == "__main__":
     
     # Test setup function
     setup_logger = setup_json_logging("setup_test")
-    print("✅ JSON logging setup completed successfully!")
+    print("âœ… JSON logging setup completed successfully!")
     
     # Test metrics summary
     summary = logger.get_metrics_summary()
-    print(f"✅ Metrics summary: {summary['metrics']}")
+    print(f"âœ… Metrics summary: {summary['metrics']}")
     
-    print("✅ Structured JSON Logging utilities test completed!")
+    print("âœ… Structured JSON Logging utilities test completed!")
+
+

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Trading Base Data Models
 
 Base classes and enums for trading data structures.
@@ -62,10 +62,12 @@ if __name__ == "__main__":
     print("Testing trading base models...")
     
     # Test enums
-    print(f"✅ OrderSide.BID: {OrderSide.BID}")
-    print(f"✅ OrderSide.ASK: {OrderSide.ASK}")
-    print(f"✅ OrderType.MARKET: {OrderType.MARKET}")
-    print(f"✅ OrderStatus.OPEN: {OrderStatus.OPEN}")
-    print(f"✅ PositionSide.LONG: {PositionSide.LONG}")
+    print(f"âœ… OrderSide.BID: {OrderSide.BID}")
+    print(f"âœ… OrderSide.ASK: {OrderSide.ASK}")
+    print(f"âœ… OrderType.MARKET: {OrderType.MARKET}")
+    print(f"âœ… OrderStatus.OPEN: {OrderStatus.OPEN}")
+    print(f"âœ… PositionSide.LONG: {PositionSide.LONG}")
     
-    print("✅ Trading base models test completed!")
+    print("âœ… Trading base models test completed!")
+
+

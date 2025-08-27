@@ -1,4 +1,4 @@
-"""
+﻿"""
 Authentication Management
 
 Handles TopStepX API authentication and token management.
@@ -218,13 +218,15 @@ if __name__ == "__main__":
     print("Testing AuthManager...")
     
     # Test basic initialization
-    from core.config import ConfigStore
+    from risk_manager_v2.core.config import ConfigStore
     config = ConfigStore()
     auth = AuthManager(config)
-    print("✅ AuthManager created successfully!")
+    print("âœ… AuthManager created successfully!")
     
     # Test authentication check (should be False initially)
     is_auth = auth.is_authenticated()
-    print(f"✅ Authentication status: {is_auth}")
+    print(f"âœ… Authentication status: {is_auth}")
     
-    print("✅ AuthManager test completed!")
+    print("âœ… AuthManager test completed!")
+
+

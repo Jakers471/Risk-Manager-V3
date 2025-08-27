@@ -1,4 +1,4 @@
-"""
+﻿"""
 Monitor Loop
 
 Handles the continuous monitoring loop and thread management.
@@ -6,7 +6,7 @@ Handles the continuous monitoring loop and thread management.
 
 import time
 import threading
-from core.logger import get_logger
+from risk_manager_v2.core.logger import get_logger
 
 class MonitorLoop:
     """Continuous monitoring loop manager."""
@@ -93,10 +93,12 @@ if __name__ == "__main__":
     from engine.monitor_core import MonitorCore
     core = MonitorCore()
     loop = MonitorLoop(core)
-    print("✅ MonitorLoop created successfully!")
+    print("âœ… MonitorLoop created successfully!")
     
     # Test status
     status = loop.get_loop_status()
-    print(f"✅ Loop status: {status}")
+    print(f"âœ… Loop status: {status}")
     
-    print("✅ MonitorLoop test completed!")
+    print("âœ… MonitorLoop test completed!")
+
+

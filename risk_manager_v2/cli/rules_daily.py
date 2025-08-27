@@ -1,4 +1,4 @@
-"""
+﻿"""
 Daily Limits Rules
 
 Handles daily loss, profit, and trade count limits.
@@ -59,24 +59,24 @@ class RulesDailyMenu(BaseMenu):
         # Show status indicators
         print("\nStatus:")
         if max_daily_loss > 0:
-            print("✅ Daily loss limit: ACTIVE")
+            print("âœ… Daily loss limit: ACTIVE")
         else:
-            print("❌ Daily loss limit: DISABLED")
+            print("âŒ Daily loss limit: DISABLED")
             
         if daily_profit_target > 0:
-            print("✅ Daily profit target: ACTIVE")
+            print("âœ… Daily profit target: ACTIVE")
         else:
-            print("❌ Daily profit target: DISABLED")
+            print("âŒ Daily profit target: DISABLED")
             
         if max_daily_trades > 0:
-            print("✅ Daily trade limit: ACTIVE")
+            print("âœ… Daily trade limit: ACTIVE")
         else:
-            print("❌ Daily trade limit: DISABLED")
+            print("âŒ Daily trade limit: DISABLED")
             
         if max_daily_volume > 0:
-            print("✅ Daily volume limit: ACTIVE")
+            print("âœ… Daily volume limit: ACTIVE")
         else:
-            print("❌ Daily volume limit: DISABLED")
+            print("âŒ Daily volume limit: DISABLED")
         
         input("\nPress Enter to continue...")
     
@@ -94,25 +94,25 @@ class RulesDailyMenu(BaseMenu):
                 
                 # Validate input
                 if new_value < 0:
-                    print("❌ Daily loss limit cannot be negative.")
+                    print("âŒ Daily loss limit cannot be negative.")
                     return
                 
                 if new_value > 100000:
-                    print("❌ Daily loss limit cannot exceed $100,000.")
+                    print("âŒ Daily loss limit cannot exceed $100,000.")
                     return
                 
                 self.config.set('risk.max_daily_loss', new_value)
                 
                 if new_value == 0:
-                    print("✅ Daily loss limit DISABLED")
+                    print("âœ… Daily loss limit DISABLED")
                 else:
-                    print(f"✅ Max Daily Loss set to ${new_value:,.2f}")
+                    print(f"âœ… Max Daily Loss set to ${new_value:,.2f}")
                     
         except ValueError:
-            print("❌ Invalid input. Please enter a valid number.")
+            print("âŒ Invalid input. Please enter a valid number.")
         except Exception as e:
             self.logger.error(f"Error setting daily loss limit: {e}")
-            print("❌ Error saving configuration.")
+            print("âŒ Error saving configuration.")
         
         input("\nPress Enter to continue...")
     
@@ -130,25 +130,25 @@ class RulesDailyMenu(BaseMenu):
                 
                 # Validate input
                 if new_value < 0:
-                    print("❌ Daily profit target cannot be negative.")
+                    print("âŒ Daily profit target cannot be negative.")
                     return
                 
                 if new_value > 100000:
-                    print("❌ Daily profit target cannot exceed $100,000.")
+                    print("âŒ Daily profit target cannot exceed $100,000.")
                     return
                 
                 self.config.set('risk.daily_profit_target', new_value)
                 
                 if new_value == 0:
-                    print("✅ Daily profit target DISABLED")
+                    print("âœ… Daily profit target DISABLED")
                 else:
-                    print(f"✅ Daily Profit Target set to ${new_value:,.2f}")
+                    print(f"âœ… Daily Profit Target set to ${new_value:,.2f}")
                     
         except ValueError:
-            print("❌ Invalid input. Please enter a valid number.")
+            print("âŒ Invalid input. Please enter a valid number.")
         except Exception as e:
             self.logger.error(f"Error setting daily profit target: {e}")
-            print("❌ Error saving configuration.")
+            print("âŒ Error saving configuration.")
         
         input("\nPress Enter to continue...")
     
@@ -166,25 +166,25 @@ class RulesDailyMenu(BaseMenu):
                 
                 # Validate input
                 if new_value < 0:
-                    print("❌ Daily trade limit cannot be negative.")
+                    print("âŒ Daily trade limit cannot be negative.")
                     return
                 
                 if new_value > 1000:
-                    print("❌ Daily trade limit cannot exceed 1,000.")
+                    print("âŒ Daily trade limit cannot exceed 1,000.")
                     return
                 
                 self.config.set('risk.max_daily_trades', new_value)
                 
                 if new_value == 0:
-                    print("✅ Daily trade limit DISABLED")
+                    print("âœ… Daily trade limit DISABLED")
                 else:
-                    print(f"✅ Max Daily Trades set to {new_value}")
+                    print(f"âœ… Max Daily Trades set to {new_value}")
                     
         except ValueError:
-            print("❌ Invalid input. Please enter a valid number.")
+            print("âŒ Invalid input. Please enter a valid number.")
         except Exception as e:
             self.logger.error(f"Error setting daily trade limit: {e}")
-            print("❌ Error saving configuration.")
+            print("âŒ Error saving configuration.")
         
         input("\nPress Enter to continue...")
     
@@ -202,25 +202,25 @@ class RulesDailyMenu(BaseMenu):
                 
                 # Validate input
                 if new_value < 0:
-                    print("❌ Daily volume limit cannot be negative.")
+                    print("âŒ Daily volume limit cannot be negative.")
                     return
                 
                 if new_value > 10000000:
-                    print("❌ Daily volume limit cannot exceed $10,000,000.")
+                    print("âŒ Daily volume limit cannot exceed $10,000,000.")
                     return
                 
                 self.config.set('risk.max_daily_volume', new_value)
                 
                 if new_value == 0:
-                    print("✅ Daily volume limit DISABLED")
+                    print("âœ… Daily volume limit DISABLED")
                 else:
-                    print(f"✅ Max Daily Volume set to ${new_value:,.2f}")
+                    print(f"âœ… Max Daily Volume set to ${new_value:,.2f}")
                     
         except ValueError:
-            print("❌ Invalid input. Please enter a valid number.")
+            print("âŒ Invalid input. Please enter a valid number.")
         except Exception as e:
             self.logger.error(f"Error setting daily volume limit: {e}")
-            print("❌ Error saving configuration.")
+            print("âŒ Error saving configuration.")
         
         input("\nPress Enter to continue...")
 
@@ -229,8 +229,10 @@ if __name__ == "__main__":
     
     # Test basic initialization
     daily_rules = RulesDailyMenu()
-    print("✅ RulesDailyMenu created successfully!")
+    print("âœ… RulesDailyMenu created successfully!")
     
     # Test display menu
     daily_rules.display_menu()
-    print("✅ RulesDailyMenu test completed!")
+    print("âœ… RulesDailyMenu test completed!")
+
+

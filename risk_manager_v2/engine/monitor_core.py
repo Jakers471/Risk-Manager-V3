@@ -1,14 +1,14 @@
-"""
+﻿"""
 Monitor Core Logic
 
 Core monitoring functionality and state management.
 """
 
-from core.config import ConfigStore
-from core.auth import AuthManager
-from core.client import ProjectXClient
-from core.logger import get_logger
-from models.rules import RiskRules
+from risk_manager_v2.core.config import ConfigStore
+from risk_manager_v2.core.auth import AuthManager
+from risk_manager_v2.core.client import ProjectXClient
+from risk_manager_v2.core.logger import get_logger
+from risk_manager_v2.models.rules import RiskRules
 from engine.calculator import RiskCalculator
 from engine.enforcer import RiskEnforcer
 
@@ -148,14 +148,16 @@ if __name__ == "__main__":
     
     # Test basic initialization
     core = MonitorCore()
-    print("✅ MonitorCore created successfully!")
+    print("âœ… MonitorCore created successfully!")
     
     # Test readiness
     ready = core.is_ready()
-    print(f"✅ System ready: {ready}")
+    print(f"âœ… System ready: {ready}")
     
     # Test account initialization
     core.initialize_accounts(['test_account_1', 'test_account_2'])
-    print(f"✅ Accounts initialized: {len(core.monitored_accounts)}")
+    print(f"âœ… Accounts initialized: {len(core.monitored_accounts)}")
     
-    print("✅ MonitorCore test completed!")
+    print("âœ… MonitorCore test completed!")
+
+

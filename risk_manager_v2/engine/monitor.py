@@ -1,4 +1,4 @@
-"""
+﻿"""
 Risk Monitor Router
 
 Main coordinator for the auto-enforcement system.
@@ -75,14 +75,16 @@ if __name__ == "__main__":
     
     # Test basic initialization
     monitor = RiskMonitor()
-    print("✅ RiskMonitor created successfully!")
+    print("âœ… RiskMonitor created successfully!")
     
     # Test status methods
     status = monitor.get_monitoring_status()
-    print(f"✅ Monitoring status: {status}")
+    print(f"âœ… Monitoring status: {status}")
     
     # Test account management
     accounts = monitor.get_monitored_accounts()
-    print(f"✅ Monitored accounts: {accounts}")
+    print(f"âœ… Monitored accounts: {accounts}")
     
-    print("✅ RiskMonitor router test completed!")
+    print("âœ… RiskMonitor router test completed!")
+
+

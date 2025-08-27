@@ -1,4 +1,4 @@
-"""
+﻿"""
 Positions Router
 
 Routes to different position-related menu modules.
@@ -42,8 +42,10 @@ if __name__ == "__main__":
     
     # Test basic initialization
     positions = PositionsMenu()
-    print("✅ PositionsMenu created successfully!")
+    print("âœ… PositionsMenu created successfully!")
     
     # Test display menu
     positions.display_menu()
-    print("✅ PositionsMenu test completed!")
+    print("âœ… PositionsMenu test completed!")
+
+

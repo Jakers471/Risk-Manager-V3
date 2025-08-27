@@ -1,4 +1,4 @@
-"""
+﻿"""
 Trading Hours Rule
 
 Handles trading hours and timezone configuration.
@@ -197,17 +197,19 @@ if __name__ == "__main__":
     
     # Test basic initialization
     trading_hours = TradingHours()
-    print("✅ TradingHours created successfully!")
+    print("âœ… TradingHours created successfully!")
     
     # Test validation
     try:
         trading_hours.validate()
-        print("✅ Validation passed!")
+        print("âœ… Validation passed!")
     except ValueError as e:
-        print(f"❌ Validation failed: {e}")
+        print(f"âŒ Validation failed: {e}")
     
     # Test basic functionality
-    print(f"✅ Trading hours display: {trading_hours.get_trading_hours_display()}")
-    print(f"✅ Within trading hours: {trading_hours.is_within_trading_hours()}")
+    print(f"âœ… Trading hours display: {trading_hours.get_trading_hours_display()}")
+    print(f"âœ… Within trading hours: {trading_hours.is_within_trading_hours()}")
     
-    print("✅ TradingHours test completed!")
+    print("âœ… TradingHours test completed!")
+
+

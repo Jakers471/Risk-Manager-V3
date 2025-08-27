@@ -1,4 +1,4 @@
-"""
+﻿"""
 Orders Router
 
 Routes to different order-related menu modules.
@@ -47,8 +47,10 @@ if __name__ == "__main__":
     
     # Test basic initialization
     orders = OrdersMenu()
-    print("✅ OrdersMenu created successfully!")
+    print("âœ… OrdersMenu created successfully!")
     
     # Test display menu
     orders.display_menu()
-    print("✅ OrdersMenu test completed!")
+    print("âœ… OrdersMenu test completed!")
+
+

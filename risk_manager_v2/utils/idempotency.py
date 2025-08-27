@@ -1,4 +1,4 @@
-"""
+﻿"""
 Idempotency utilities for preventing duplicate actions.
 
 Ensures that identical actions are not executed multiple times.
@@ -10,7 +10,7 @@ import threading
 import time
 from typing import Dict, Set, Optional, Any, Callable, List
 from datetime import datetime, timedelta
-from core.logger import get_logger
+from risk_manager_v2.core.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -371,29 +371,31 @@ if __name__ == "__main__":
     
     # Test idempotency store
     store = IdempotencyStore(max_keys=1000, ttl_hours=24)
-    print("✅ IdempotencyStore created successfully!")
+    print("âœ… IdempotencyStore created successfully!")
     
     # Test idempotency manager
     manager = IdempotencyManager(store)
-    print("✅ IdempotencyManager created successfully!")
+    print("âœ… IdempotencyManager created successfully!")
     
     # Test risk action idempotency
     risk_idempotency = RiskActionIdempotency("test_account_123")
-    print("✅ RiskActionIdempotency created successfully!")
+    print("âœ… RiskActionIdempotency created successfully!")
     
     # Test action key generation
     action_data = {"positions": [{"id": "123", "size": 10}]}
     action_key = generate_action_key("close_positions", "test_account", action_data)
-    print(f"✅ Action key generated: {action_key[:16]}...")
+    print(f"âœ… Action key generated: {action_key[:16]}...")
     
     # Test stats
     stats = manager.get_stats()
-    print(f"✅ Idempotency stats: {stats}")
+    print(f"âœ… Idempotency stats: {stats}")
     
     # Test duplicate prevention
     test_action = {"test": "data", "timestamp": "2024-01-01T00:00:00Z"}
     key1 = store.generate_key(test_action)
     key2 = store.generate_key(test_action)
-    print(f"✅ Duplicate prevention: {key1 == key2}")
+    print(f"âœ… Duplicate prevention: {key1 == key2}")
     
-    print("✅ Idempotency utilities test completed!")
+    print("âœ… Idempotency utilities test completed!")
+
+
