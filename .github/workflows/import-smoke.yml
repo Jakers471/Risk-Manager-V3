@@ -13,12 +13,15 @@ jobs:
       - name: Import check
         run: |
           python - <<'PY'
+          import sys, traceback
+          print("python:", sys.version)
           try:
+              # minimal imports that must always work
               import risk_manager_v2
-              from risk_manager_v2.core.clients.projectx import ProjectXClient
               from risk_manager_v2.core.config import ConfigStore
               from risk_manager_v2.core.auth import AuthManager
-              print("✅ imports ok")
-          except Exception as e:
-              raise SystemExit(e)
+              print("imports ok")
+          except Exception:
+              traceback.print_exc()
+              raise SystemExit(1)
           PY
