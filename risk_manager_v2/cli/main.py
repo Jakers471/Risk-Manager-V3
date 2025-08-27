@@ -14,6 +14,7 @@ Routes to different menu modules - keeps main file small and focused.
 from .setup import SetupMenu
 from .accounts import AccountsMenu
 from .rules import RulesMenu
+from .monitoring import MonitoringMenu
 
 class MainMenu:
     """Main menu router - delegates to specialized menu modules."""
@@ -23,8 +24,9 @@ class MainMenu:
         self.setup_menu = SetupMenu()
         self.accounts_menu = AccountsMenu()
         self.rules_menu = RulesMenu()
+        # Initialize other menu modules
+        self.monitoring_menu = MonitoringMenu()
         # TODO: Initialize other menu modules when they're created
-        # self.monitoring_menu = MonitoringMenu()
         # self.status_menu = StatusMenu()
         # self.logs_menu = LogsMenu()
         self.running = True
@@ -52,7 +54,7 @@ class MainMenu:
         elif choice == "3":
             self.rules_menu.run()
         elif choice == "4":
-            print("Monitoring menu - coming soon!")
+            self.monitoring_menu.run()
         elif choice == "5":
             print("Status menu - coming soon!")
         elif choice == "6":

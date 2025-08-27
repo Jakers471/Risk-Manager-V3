@@ -101,18 +101,6 @@ class TopStepXRateLimiter:
             refill_time=1.0
         )
     
-    def consume(self, bucket: str) -> None:
-        """Consume a token from the specified bucket (blocking)."""
-        if bucket == "bars":
-            if not self.market_data_limiter.acquire(timeout=10.0):
-                raise Exception("Market data rate limit exceeded")
-        elif bucket == "emergency":
-            if not self.emergency_limiter.acquire(timeout=5.0):
-                raise Exception("Emergency action rate limit exceeded")
-        else:  # general
-            if not self.general_limiter.acquire(timeout=10.0):
-                raise Exception("General API rate limit exceeded")
-    
     def acquire_general(self, timeout: Optional[float] = None) -> bool:
         """Acquire token for general API calls."""
         return self.general_limiter.acquire(timeout=timeout)

@@ -1,0 +1,30 @@
+{
+  "correlation_id": "a90d5fb970094430874664528f8396ec",
+  "timestamp": "2025-08-27T06:37:46.381864+00:00",
+  "context": {
+    "account_id": "11010173",
+    "day_pnl": 0.0,
+    "risk_tier": "t0",
+    "positions_count": 0,
+    "orders_count": 0,
+    "timestamp": "2025-08-27T06:37:46.379848+00:00"
+  },
+  "action_plan": {
+    "correlation_id": "a90d5fb970094430874664528f8396ec",
+    "actions": [
+      {
+        "kind": "noop",
+        "symbol": "",
+        "qty": 0.0,
+        "reason": "Within all policy limits",
+        "severity": "info"
+      }
+    ],
+    "notes": {
+      "policy": "noop",
+      "daily_loss": "$0.00 / $-150",
+      "total_contracts": "0 / 1",
+      "status": "All checks passed"
+    }
+  }
+}
