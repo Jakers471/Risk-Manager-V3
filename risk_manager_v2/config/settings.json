@@ -1,0 +1,49 @@
+{
+  "api": {
+    "base_url": "https://api.topstepx.com",
+    "user_hub": "https://rtc.topstepx.com/hubs/user",
+    "market_hub": "https://rtc.topstepx.com/hubs/market",
+    "timeout": 30,
+    "max_retries": 3
+  },
+  "auth": {
+    "userName": "jakertrader",
+    "api_key": "rekg1AiqQWx1dHg4kgiJ28o9LX49Duf6cOhnNVuBkVw=",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEyNjI0NCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL3NpZCI6IjQ2MzViZTk5LWNiNmMtNDg0Ni05ZGVhLTI4YmVlOGRiM2IzOCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJqYWtlcnRyYWRlciIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6InVzZXIiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL2F1dGhlbnRpY2F0aW9ubWV0aG9kIjoiYXBpLWtleSIsIm1zZCI6WyJDTUVHUk9VUF9UT0IiLCJDTUVfVE9CIl0sIm1mYSI6InZlcmlmaWVkIiwiZXhwIjoxNzU2MzQxMTE2fQ.uE8a7lFfdgO7ntM9ib0juOwIp-zmprx8sZd1e7KnNgE",
+    "token_expiry": "2025-08-27T19:31:55.922017"
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "logs/risk_manager.log",
+    "max_size": "10MB",
+    "backup_count": 5
+  },
+  "risk": {
+    "max_daily_loss": 1000.0,
+    "daily_profit_target": 2000.0,
+    "max_daily_trades": 10,
+    "max_daily_volume": 100000.0,
+    "max_position_size": 10,
+    "max_open_positions": 5,
+    "max_risk_per_trade": 500.0,
+    "auto_flatten": true,
+    "stop_on_loss": true,
+    "stop_on_profit": true,
+    "end_of_day_flatten": true,
+    "session_timeout": 30
+  },
+  "trading_hours": {
+    "start": "09:30",
+    "end": "16:00",
+    "timezone": "America/New_York",
+    "pre_market_start": "04:00",
+    "pre_market_end": "09:30",
+    "after_hours_start": "16:00",
+    "after_hours_end": "20:00",
+    "enable_pre_market": false,
+    "enable_after_hours": false,
+    "allow_regular": true,
+    "allow_pre_market": false,
+    "allow_after_hours": false
+  }
+}
