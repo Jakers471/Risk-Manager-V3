@@ -101,8 +101,12 @@ class RiskMonitor:
             if self.stop_event.is_set():
                 return
             
+            # Get positions and orders
+            positions = self.client.get_open_positions(account_id)
+            orders = self.client.get_orders(account_id)
+            
             # Build minimal EvaluationContext
-            evaluation_context = self._build_evaluation_context(account_id)
+            evaluation_context = self._build_evaluation_context(account_id, positions, orders)
             
             # Call RiskEngine.evaluate (stub)
             action_plan = self._evaluate_risk_engine(evaluation_context)
@@ -117,10 +121,12 @@ class RiskMonitor:
         except Exception as e:
             self.logger.error(f"Error evaluating account {account_id}: {e}")
     
-    def _build_evaluation_context(self, account_id: str) -> Dict:
+    def _build_evaluation_context(self, account_id: str, positions: List[Dict], orders: List[Dict]) -> Dict:
         """Build minimal evaluation context."""
         return {
             'account_id': account_id,
+            'positions': positions,
+            'orders': orders,
             'timestamp': datetime.now().isoformat(),
             'dry_run': self.dry_run
         }

@@ -25,15 +25,29 @@ class MonitoringMenu:
         self.rate_limiter = TopStepXRateLimiter() if TopStepXRateLimiter else None
 
     def run(self):
+        """Run the monitoring menu."""
         while True:
-            self._display_menu()
-            c = input("Choice: ").strip()
-            if c == "1": self._start()
-            elif c == "2": self._stop()
-            elif c == "3": self._status()
-            elif c == "4": self._toggle_dry_run()
-            elif c == "0": break
-            else: print("Invalid choice.")
+            try:
+                self._display_menu()
+                c = input("Choice: ").strip()
+                if c == "1": 
+                    self._start()
+                elif c == "2": 
+                    self._stop()
+                elif c == "3": 
+                    self._status()
+                elif c == "4": 
+                    self._toggle_dry_run()
+                elif c == "0": 
+                    break
+                else: 
+                    print("Invalid choice.")
+            except KeyboardInterrupt:
+                print("\n\nReturning to main menu...")
+                break
+            except Exception as e:
+                print(f"Error: {e}")
+                input("Press Enter to continue...")
 
     def _display_menu(self):
         s = "🟢 RUNNING" if self.monitor.is_running() else "🔴 STOPPED"
