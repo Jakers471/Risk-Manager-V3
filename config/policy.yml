@@ -1,0 +1,4 @@
+﻿tiers:
+  t0: { daily_loss: -150, max_contracts: 1, max_per_symbol: 1, news_blackout_min: 15, late_session_min: 10 }
+  t1: { daily_loss: -300, max_contracts: 2, max_per_symbol: 2, news_blackout_min: 15, late_session_min: 10 }
+  t2: { daily_loss: -600, max_contracts: 4, max_per_symbol: 3, news_blackout_min: 30, late_session_min: 15 }

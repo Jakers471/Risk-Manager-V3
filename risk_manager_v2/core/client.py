@@ -134,6 +134,19 @@ class ProjectXClient:
         data = {"accountId": int(account_id), "orderId": int(order_id)}
         return self._make_request("/api/Order/cancel", data=data)
     
+    def get_trades(self, account_id: str, start_timestamp: str = None, end_timestamp: str = None) -> List[Dict]:
+        """Get trade history for account."""
+        data = {"accountId": int(account_id)}
+        if start_timestamp:
+            data["startTimestamp"] = start_timestamp
+        if end_timestamp:
+            data["endTimestamp"] = end_timestamp
+        
+        response = self._make_request("/api/Trade/search", data=data)
+        if response and response.get("success"):
+            return response.get("trades", [])
+        return []
+    
     # Market Data
     def get_market_data_bars(self, contract_id: str, start_time: str, end_time: str,
                             unit: int = 2, unit_number: int = 1, live: bool = False,
