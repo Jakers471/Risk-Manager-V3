@@ -6,7 +6,7 @@ Handles all API communication with the TopStepX Gateway.
 
 import requests
 import time
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from .config import ConfigStore
 from .auth import AuthManager
 from .logger import get_logger
@@ -103,6 +103,10 @@ class ProjectXClient:
             return response.get("positions", [])
         return []
     
+    def get_positions(self, account_id: str) -> List[Dict]:
+        """Get positions for account (alias for get_open_positions)."""
+        return self.get_open_positions(account_id)
+    
     def close_position(self, account_id: str, contract_id: str) -> Dict:
         """Close a specific position."""
         data = {"accountId": int(account_id), "contractId": contract_id}
@@ -116,6 +120,10 @@ class ProjectXClient:
         if response and response.get("success"):
             return response.get("orders", [])
         return []
+    
+    def get_orders(self, account_id: str) -> List[Dict]:
+        """Get orders for account (alias for get_open_orders)."""
+        return self.get_open_orders(account_id)
     
     def place_order(self, account_id: str, contract_id: str, order_type: int, side: int, size: int,
                    limit_price: Optional[float] = None, stop_price: Optional[float] = None,
@@ -133,6 +141,59 @@ class ProjectXClient:
         """Cancel a specific order."""
         data = {"accountId": int(account_id), "orderId": int(order_id)}
         return self._make_request("/api/Order/cancel", data=data)
+    
+    def cancel_orders(self, account_id: str, symbol: Optional[str] = None) -> Dict[str, Any]:
+        """Cancel all orders for account or symbol."""
+        try:
+            orders = self.get_open_orders(account_id)
+            if symbol:
+                orders = [o for o in orders if o.get("contractId") == symbol]
+            
+            cancelled = 0
+            for order in orders:
+                order_id = order.get("id")
+                if order_id:
+                    self.cancel_order(account_id, str(order_id))
+                    cancelled += 1
+            
+            return {"status": "success", "cancelled_count": cancelled}
+        except Exception as e:
+            return {"status": "error", "error": str(e)}
+    
+    def place_market(self, account_id: str, symbol: str, qty: float, side: str) -> Dict[str, Any]:
+        """Place a market order."""
+        try:
+            order_type = 2  # market
+            side_int = 0 if side.lower() == "buy" else 1  # 0=buy, 1=sell
+            
+            result = self.place_order(
+                account_id=account_id,
+                contract_id=symbol,
+                order_type=order_type,
+                side=side_int,
+                size=int(qty)
+            )
+            return {"status": "success", "order": result}
+        except Exception as e:
+            return {"status": "error", "error": str(e)}
+    
+    def get_day_pnl(self, account_id: str) -> float:
+        """Get day P&L from trades."""
+        try:
+            from datetime import date
+            today = date.today().isoformat()
+            trades = self.get_trades(account_id, start_timestamp=today)
+            
+            total_pnl = 0.0
+            for trade in trades:
+                pnl = trade.get("realizedPnl", 0)
+                if pnl is not None:
+                    total_pnl += float(pnl)
+            
+            return total_pnl
+        except Exception as e:
+            self.logger.error(f"Error getting day P&L for {account_id}: {e}")
+            return 0.0
     
     def get_trades(self, account_id: str, start_timestamp: str = None, end_timestamp: str = None) -> List[Dict]:
         """Get trade history for account."""

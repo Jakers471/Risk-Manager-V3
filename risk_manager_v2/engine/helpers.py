@@ -1,83 +1,134 @@
 """
 Engine Helpers
 
-Helper functions for data mapping and logging.
+Helper functions for enforcement actions and lockout management.
 """
 
 import json
-from datetime import datetime, timezone
-from typing import List, Dict
+import os
+from datetime import datetime, timezone, timedelta
+from typing import Dict, Any, Optional
 from pathlib import Path
 
-from risk_manager_v2.schemas.evaluation_context import Position, Order
-from risk_manager_v2.schemas.action_plan import ActionPlan
 from risk_manager_v2.core.client import ProjectXClient
+from risk_manager_v2.schemas.action_plan import ActionPlan
 from risk_manager_v2.core.logger import get_logger
 
 logger = get_logger(__name__)
 
-def map_position_data(raw_position: Dict) -> Position:
-    """Map raw API position data to Position dataclass."""
-    return Position(
-        symbol=raw_position.get("contractId", ""),
-        qty=float(raw_position.get("size", 0)),
-        entry_price=float(raw_position.get("avgPrice", 0)),
-        unrealized_pnl=float(raw_position.get("unrealizedPnl", 0)),
-        side="long" if raw_position.get("size", 0) > 0 else "short"
-    )
-
-def map_order_data(raw_order: Dict) -> Order:
-    """Map raw API order data to Order dataclass."""
-    return Order(
-        id=str(raw_order.get("id", "")),
-        symbol=raw_order.get("contractId", ""),
-        side="buy" if raw_order.get("side", 0) == 0 else "sell",
-        qty=float(raw_order.get("size", 0)),
-        type=_map_order_type(raw_order.get("type", 1)),
-        status=_map_order_status(raw_order.get("status", 0))
-    )
-
-def _map_order_type(order_type: int) -> str:
-    """Map order type enum to string."""
-    types = {
-        1: "limit",
-        2: "market", 
-        4: "stop",
-        5: "trailing_stop",
-        6: "join_bid",
-        7: "join_ask"
-    }
-    return types.get(order_type, "unknown")
-
-def _map_order_status(status: int) -> str:
-    """Map order status enum to string."""
-    statuses = {
-        0: "pending",
-        1: "filled",
-        2: "cancelled",
-        3: "rejected"
-    }
-    return statuses.get(status, "unknown")
-
-def get_day_pnl_from_trades(client: ProjectXClient, account_id: str) -> float:
-    """Calculate day P&L from today's trades."""
+def enforce_flatten(client: ProjectXClient, account_id: str, symbol: str, reason: str) -> Dict[str, Any]:
+    """Flatten position: cancel orders then market close."""
     try:
-        from datetime import date
-        today = date.today().isoformat()
-        trades = client.get_trades(account_id, start_timestamp=today)
+        # 1. Cancel all open orders for symbol
+        cancel_result = client.cancel_orders(account_id, symbol)
         
-        total_pnl = 0.0
-        for trade in trades:
-            pnl = trade.get("realizedPnl", 0)
-            if pnl is not None:
-                total_pnl += float(pnl)
+        # 2. Get current position and close it
+        positions = client.get_positions(account_id)
+        position = next((p for p in positions if p.symbol == symbol), None)
         
-        return total_pnl
+        if position and position.qty != 0:
+            # Market order to close position
+            side = "sell" if position.qty > 0 else "buy"
+            close_result = client.place_market(account_id, symbol, abs(position.qty), side)
+            logger.info(f"Flattened {symbol} position: {position.qty} contracts")
+            return {"status": "success", "cancelled": cancel_result, "closed": close_result}
+        else:
+            return {"status": "success", "cancelled": cancel_result, "closed": None}
+            
     except Exception as e:
-        logger.error(f"Error getting day P&L for {account_id}: {e}")
-        return 0.0
+        logger.error(f"Error flattening {symbol} for {account_id}: {e}")
+        return {"status": "error", "error": str(e)}
 
-def log_tick_event(correlation_id: str, ctx_data: Dict, action_plan: ActionPlan):
+def enforce_reduce(client: ProjectXClient, account_id: str, symbol: str, qty: float, reason: str) -> Dict[str, Any]:
+    """Reduce position by specified quantity."""
+    try:
+        positions = client.get_positions(account_id)
+        position = next((p for p in positions if p.symbol == symbol), None)
+        
+        if position and position.qty != 0:
+            reduce_size = min(abs(position.qty), abs(qty))
+            side = "sell" if position.qty > 0 else "buy"
+            
+            result = client.place_market(account_id, symbol, reduce_size, side)
+            logger.info(f"Reduced {symbol} position by {reduce_size} contracts")
+            return {"status": "success", "reduced": result}
+        else:
+            return {"status": "no_position", "message": f"No position in {symbol}"}
+            
+    except Exception as e:
+        logger.error(f"Error reducing {symbol} for {account_id}: {e}")
+        return {"status": "error", "error": str(e)}
+
+def enforce_cancel_orders(client: ProjectXClient, account_id: str, symbol: str, reason: str) -> Dict[str, Any]:
+    """Cancel all open orders for symbol."""
+    try:
+        result = client.cancel_orders(account_id, symbol)
+        logger.info(f"Cancelled orders for {symbol}")
+        return {"status": "success", "cancelled": result}
+        
+    except Exception as e:
+        logger.error(f"Error cancelling orders for {symbol}: {e}")
+        return {"status": "error", "error": str(e)}
+
+def enforce_lockout(account_id: str, reason: str, duration_hours: int = 24) -> Dict[str, Any]:
+    """Create lockout file to block new risk."""
+    try:
+        runtime_dir = Path("runtime")
+        runtime_dir.mkdir(exist_ok=True)
+        
+        lock_data = {
+            "locked": True,
+            "reason": reason,
+            "account_id": account_id,
+            "until": (datetime.now(timezone.utc) + timedelta(hours=duration_hours)).isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        lock_file = runtime_dir / "lock.json"
+        with open(lock_file, 'w') as f:
+            json.dump(lock_data, f, indent=2)
+        
+        logger.warning(f"Lockout created for {account_id}: {reason}")
+        return {"status": "success", "lockout": lock_data}
+        
+    except Exception as e:
+        logger.error(f"Error creating lockout for {account_id}: {e}")
+        return {"status": "error", "error": str(e)}
+
+def check_lockout(account_id: str) -> bool:
+    """Check if account is locked out."""
+    try:
+        lock_file = Path("runtime/lock.json")
+        if not lock_file.exists():
+            return False
+        
+        with open(lock_file, 'r') as f:
+            lock_data = json.load(f)
+        
+        if not lock_data.get("locked", False):
+            return False
+        
+        # Check if lock applies to this account
+        lock_account = lock_data.get("account_id")
+        if lock_account and lock_account != account_id:
+            return False
+        
+        # Check if lock has expired
+        until_str = lock_data.get("until")
+        if until_str:
+            until_time = datetime.fromisoformat(until_str.replace('Z', '+00:00'))
+            if datetime.now(timezone.utc) > until_time:
+                # Lock expired, remove it
+                lock_file.unlink()
+                return False
+        
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error checking lockout for {account_id}: {e}")
+        return False
+
+def log_tick_event(correlation_id: str, ctx_data: Dict, action_plan: ActionPlan, results: Dict[str, Any]):
     """Log tick event to JSON file."""
     try:
         runtime_dir = Path("runtime/events")
@@ -94,13 +145,13 @@ def log_tick_event(correlation_id: str, ctx_data: Dict, action_plan: ActionPlan)
                         "kind": action.kind,
                         "symbol": action.symbol,
                         "qty": action.qty,
-                        "reason": action.reason,
-                        "severity": action.severity
+                        "reason": action.reason
                     }
                     for action in action_plan.actions
                 ],
                 "notes": action_plan.notes
-            }
+            },
+            "results": results
         }
         
         event_file = runtime_dir / f"{correlation_id}.json"
