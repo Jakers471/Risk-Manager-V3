@@ -9,7 +9,15 @@ TopStepX uses JSON Web Tokens (JWT) for authentication. Obtain a session token r
 
 ## Authentication Endpoint
 
-**URL:** `POST https://gateway-api-demo.s2f.projectx.com/api/Auth/loginKey`
+**URL:** `API URL: POST https://api.topstepx.com/api/Auth/loginKey
+
+API Reference: /api/Auth/loginKey
+
+API Endpoint: https://api.topstepx.com
+
+User Hub: https://rtc.topstepx.com/hubs/user
+
+Market Hub: https://rtc.topstepx.com/hubs/market
 
 **Request Body:**
 ```json
@@ -31,8 +39,7 @@ TopStepX uses JSON Web Tokens (JWT) for authentication. Obtain a session token r
 
 **cURL Example:**
 ```bash
-curl -X 'POST' \
-  'https://gateway-api-demo.s2f.projectx.com/api/Auth/loginKey' \
+curl -X 'POST' \ \
   -H 'accept: text/plain' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -48,7 +55,7 @@ Session tokens are only valid for **24 hours**. If your token expires, you must 
 
 ### Validation Endpoint
 
-**URL:** `POST https://gateway-api-demo.s2f.projectx.com/api/Auth/validate`
+**URL:** `POST 
 
 **Request:** No body required (uses existing token in Authorization header)
 
@@ -65,7 +72,6 @@ Session tokens are only valid for **24 hours**. If your token expires, you must 
 **cURL Example:**
 ```bash
 curl -X 'POST' \
-  'https://gateway-api-demo.s2f.projectx.com/api/Auth/validate' \
   -H 'accept: text/plain' \
   -H 'Content-Type: application/json'
 ```

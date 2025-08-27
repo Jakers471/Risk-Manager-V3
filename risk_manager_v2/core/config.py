@@ -12,7 +12,7 @@ from typing import Dict, Any, Optional
 class ConfigStore:
     """Manages application configuration and settings."""
     
-    def __init__(self, config_file: str = "config/settings.json"):
+    def __init__(self, config_file: str = "risk_manager_v2/config/settings.json"):
         """Initialize configuration store."""
         self.config_file = Path(config_file)
         self.config: Dict[str, Any] = {}

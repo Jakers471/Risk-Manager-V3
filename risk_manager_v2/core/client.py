@@ -22,7 +22,7 @@ class ProjectXClient:
     
     def __init__(self, base_url: Optional[str] = None, api_key: Optional[str] = None):
         """Initialize ProjectX client."""
-        self.base_url = base_url or os.getenv("PROJECTX_BASE_URL", "https://gateway-api-demo.s2f.projectx.com")
+        self.base_url = base_url or os.getenv("PROJECTX_BASE_URL", "https://api.topstepx.com")
         self.api_key = api_key or os.getenv("PROJECTX_API_KEY", "")
         self.rate_limiter = TopStepXRateLimiter()
         self.session = requests.Session()
@@ -284,3 +284,24 @@ class ProjectXClient:
         except Exception as e:
             logger.error(f"Connection test failed: {e}")
             return False
+    
+    def get_accounts(self) -> List[Dict[str, Any]]:
+        """Get list of trading accounts."""
+        if self.simulator():
+            logger.info("Using mock accounts data")
+            return [
+                {
+                    "accountId": "11010173",
+                    "accountName": "JakerTrader Account",
+                    "status": "ACTIVE",
+                    "balance": 50000.0,
+                    "buyingPower": 100000.0
+                }
+            ]
+        
+        try:
+            response = self._make_request("POST", "/api/Account/search", data={"onlyActiveAccounts": True}, use_read_bucket=True)
+            return response.get("accounts", [])
+        except Exception as e:
+            logger.error(f"Failed to get accounts: {e}")
+            return []
