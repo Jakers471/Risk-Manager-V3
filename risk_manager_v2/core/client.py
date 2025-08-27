@@ -156,8 +156,8 @@ class ProjectXClient:
         }
         
         side_map = {
-            "BUY": OrderSide.BUY,
-            "SELL": OrderSide.SELL
+            "BUY": OrderSide.BID,
+            "SELL": OrderSide.ASK
         }
         
         return Order(
