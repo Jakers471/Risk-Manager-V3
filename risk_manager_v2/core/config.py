@@ -146,3 +146,4 @@ if __name__ == "__main__":
     api_url = config.get("api.base_url")
     print(f"âœ… API URL: {api_url}")
 
+

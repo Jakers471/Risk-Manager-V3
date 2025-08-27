@@ -177,3 +177,4 @@ if __name__ == "__main__":
     rules.display_menu()
     print("âœ… RulesMenu test completed!")
 
+

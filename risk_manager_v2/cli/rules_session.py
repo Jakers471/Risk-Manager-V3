@@ -227,3 +227,4 @@ if __name__ == "__main__":
     session_rules.display_menu()
     print("âœ… RulesSessionMenu test completed!")
 
+

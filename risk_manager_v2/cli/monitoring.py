@@ -82,3 +82,4 @@ class MonitoringMenu:
             setattr(self.monitor.enforcer, "dry_run", self.dry_run)
         print("Dry run is now:", self.dry_run)
 
+

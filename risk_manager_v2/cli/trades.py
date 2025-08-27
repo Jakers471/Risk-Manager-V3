@@ -286,3 +286,4 @@ if __name__ == "__main__":
     trades.display_menu()
     print("âœ… TradesMenu test completed!")
 
+

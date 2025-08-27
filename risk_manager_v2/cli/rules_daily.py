@@ -235,3 +235,4 @@ if __name__ == "__main__":
     daily_rules.display_menu()
     print("âœ… RulesDailyMenu test completed!")
 
+

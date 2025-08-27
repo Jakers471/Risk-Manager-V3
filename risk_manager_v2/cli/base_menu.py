@@ -27,3 +27,4 @@ class BaseMenu:
         """Override this method in subclasses."""
         raise NotImplementedError("Subclasses must implement display_menu()")
 
+

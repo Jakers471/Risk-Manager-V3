@@ -319,3 +319,4 @@ if __name__ == "__main__":
     hours_rules.display_menu()
     print("âœ… RulesHoursMenu test completed!")
 
+
