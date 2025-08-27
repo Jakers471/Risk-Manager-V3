@@ -36,7 +36,7 @@ class MonitoringMenu:
             else: print("Invalid choice.")
 
     def _display_menu(self):
-        s = "ðŸŸ¢ RUNNING" if self.monitor.is_running() else "ðŸ”´ STOPPED"
+        s = "🟢 RUNNING" if self.monitor.is_running() else "🔴 STOPPED"
         print(f"\n=== MONITORING CONTROL [{s}] ===")
         print("1) Start Monitoring")
         print("2) Stop Monitoring")
@@ -45,15 +45,20 @@ class MonitoringMenu:
         print("0) Back to main menu")
 
     def _start(self):
-        if self.monitor.is_running(): return print("Already running.")
+        if self.monitor.is_running(): 
+            print("Already running.")
+            return
+        
         if not self.auth.is_authenticated():
-            print("âŒ Not authenticated. Use Setup first."); return
+            print("❌ Not authenticated. Use Setup first.")
+            return
+        
         ok = self.monitor.start_monitoring(self.client, self.rate_limiter, self.dry_run)
-        print("âœ… Started." if ok else "âŒ Failed to start.")
+        print("✅ Started." if ok else "❌ Failed to start.")
 
     def _stop(self):
         ok = self.monitor.stop_monitoring()
-        print("âœ… Stopped." if ok else "âŒ Failed to stop.")
+        print("✅ Stopped." if ok else "❌ Failed to stop.")
 
     def _status(self):
         st = self.monitor.get_monitoring_status()
@@ -73,13 +78,14 @@ class MonitoringMenu:
     def _toggle_dry_run(self):
         self.dry_run = not self.dry_run
         try:
-            self.config.set("monitor.dry_run", self.dry_run); self.config.save()
+            self.config.set("monitor.dry_run", self.dry_run)
+            self.config.save()
         except Exception:
             pass
-        if hasattr(self.monitor.enforcer, "set_dry_run"):
-            self.monitor.enforcer.set_dry_run(self.dry_run)
-        else:
-            setattr(self.monitor.enforcer, "dry_run", self.dry_run)
+        
+        # Update monitor's dry_run setting
+        self.monitor.dry_run = self.dry_run
+        
         print("Dry run is now:", self.dry_run)
 
 
