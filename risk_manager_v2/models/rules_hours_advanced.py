@@ -1,4 +1,4 @@
-"""
+﻿"""
 Trading Hours Advanced Features
 
 Advanced time calculations and status methods for trading hours.
@@ -189,13 +189,14 @@ if __name__ == "__main__":
     trading_hours = TradingHours()
     advanced = TradingHoursAdvanced(trading_hours)
     
-    print("✅ TradingHoursAdvanced created successfully!")
+    print("âœ… TradingHoursAdvanced created successfully!")
     
     # Test advanced functionality
     status = advanced.get_trading_status()
-    print(f"✅ Trading status: {status}")
+    print(f"âœ… Trading status: {status}")
     
     session_info = advanced.get_session_info()
-    print(f"✅ Session info: {session_info}")
+    print(f"âœ… Session info: {session_info}")
     
-    print("✅ TradingHoursAdvanced test completed!")
+    print("âœ… TradingHoursAdvanced test completed!")
+

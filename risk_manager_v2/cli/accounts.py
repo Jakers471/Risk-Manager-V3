@@ -1,4 +1,4 @@
-"""
+﻿"""
 Account Management Router
 
 Routes to different account-related menu modules.
@@ -57,8 +57,9 @@ if __name__ == "__main__":
     
     # Test basic initialization
     accounts = AccountsMenu()
-    print("✅ AccountsMenu created successfully!")
+    print("âœ… AccountsMenu created successfully!")
     
     # Test display menu
     accounts.display_menu()
-    print("✅ AccountsMenu test completed!")
+    print("âœ… AccountsMenu test completed!")
+

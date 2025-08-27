@@ -1,4 +1,4 @@
-"""
+﻿"""
 Risk Rules Data Models Router
 
 Routes to different rule type modules.
@@ -115,14 +115,15 @@ if __name__ == "__main__":
     
     # Test basic initialization
     rules = RiskRules()
-    print("✅ RiskRules created successfully!")
+    print("âœ… RiskRules created successfully!")
     
     # Test rule status
     status = rules.get_rule_status()
-    print(f"✅ Rule status: {status}")
+    print(f"âœ… Rule status: {status}")
     
     # Test to_dict
     data = rules.to_dict()
-    print(f"✅ To dict: {data}")
+    print(f"âœ… To dict: {data}")
     
-    print("✅ RiskRules test completed!")
+    print("âœ… RiskRules test completed!")
+

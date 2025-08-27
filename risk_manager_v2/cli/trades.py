@@ -1,4 +1,4 @@
-"""
+﻿"""
 Trades Menu
 
 Handles viewing trade history and P&L calculations.
@@ -40,7 +40,7 @@ class TradesMenu(BaseMenu):
         print("\n=== RECENT TRADES ===")
         
         if not self.auth.is_authenticated():
-            print("❌ Not authenticated")
+            print("âŒ Not authenticated")
             return
         
         account_id = input("Enter Account ID: ").strip()
@@ -75,7 +75,7 @@ class TradesMenu(BaseMenu):
         print("\n=== TRADES BY DATE ===")
         
         if not self.auth.is_authenticated():
-            print("❌ Not authenticated")
+            print("âŒ Not authenticated")
             return
         
         account_id = input("Enter Account ID: ").strip()
@@ -123,7 +123,7 @@ class TradesMenu(BaseMenu):
         print("\n=== P&L CALCULATION ===")
         
         if not self.auth.is_authenticated():
-            print("❌ Not authenticated")
+            print("âŒ Not authenticated")
             return
         
         account_id = input("Enter Account ID: ").strip()
@@ -280,8 +280,9 @@ if __name__ == "__main__":
     
     # Test basic initialization
     trades = TradesMenu()
-    print("✅ TradesMenu created successfully!")
+    print("âœ… TradesMenu created successfully!")
     
     # Test display menu
     trades.display_menu()
-    print("✅ TradesMenu test completed!")
+    print("âœ… TradesMenu test completed!")
+

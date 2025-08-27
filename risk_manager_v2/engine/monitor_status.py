@@ -1,10 +1,10 @@
-"""
+﻿"""
 Monitor Status
 
 Handles monitoring status and violation history tracking.
 """
 
-from core.logger import get_logger
+from risk_manager_v2.core.logger import get_logger
 
 class MonitorStatus:
     """Monitoring status and history management."""
@@ -118,14 +118,15 @@ if __name__ == "__main__":
     from engine.monitor_core import MonitorCore
     core = MonitorCore()
     status = MonitorStatus(core)
-    print("✅ MonitorStatus created successfully!")
+    print("âœ… MonitorStatus created successfully!")
     
     # Test status methods
     current_status = status.get_status()
-    print(f"✅ Current status: {current_status}")
+    print(f"âœ… Current status: {current_status}")
     
     # Test stats
     stats = status.get_stats()
-    print(f"✅ Monitoring stats: {stats}")
+    print(f"âœ… Monitoring stats: {stats}")
     
-    print("✅ MonitorStatus test completed!")
+    print("âœ… MonitorStatus test completed!")
+

@@ -1,13 +1,13 @@
-"""
+﻿"""
 System Status Menu
 
 Handles system status, health checks, and diagnostics.
 """
 
 from .base_menu import BaseMenu
-from models.rules import RiskRules
-from models.account import Account
-from models.trading import TradingData
+from risk_manager_v2.models.rules import RiskRules
+from risk_manager_v2.models.account import Account
+from risk_manager_v2.models.trading import TradingData
 
 class StatusMenu(BaseMenu):
     """System status and diagnostics menu."""
@@ -55,19 +55,19 @@ class StatusMenu(BaseMenu):
         api_status = self.client.test_connection() if auth_status else False
         config_status = self.config.config_file.exists()
         
-        print(f"Authentication: {'✅ Connected' if auth_status else '❌ Not Connected'}")
-        print(f"API Connection: {'✅ Working' if api_status else '❌ Failed'}")
-        print(f"Configuration: {'✅ Loaded' if config_status else '❌ Missing'}")
+        print(f"Authentication: {'âœ… Connected' if auth_status else 'âŒ Not Connected'}")
+        print(f"API Connection: {'âœ… Working' if api_status else 'âŒ Failed'}")
+        print(f"Configuration: {'âœ… Loaded' if config_status else 'âŒ Missing'}")
         
         # Overall status
         if auth_status and api_status and config_status:
-            print("\n🎉 System Status: HEALTHY")
+            print("\nðŸŽ‰ System Status: HEALTHY")
             print("All components are working correctly.")
         elif auth_status and config_status:
-            print("\n⚠️ System Status: PARTIAL")
+            print("\nâš ï¸ System Status: PARTIAL")
             print("Authentication and config working, but API connection failed.")
         else:
-            print("\n❌ System Status: UNHEALTHY")
+            print("\nâŒ System Status: UNHEALTHY")
             print("Multiple components are not working.")
         
         input("\nPress Enter to continue...")
@@ -77,7 +77,7 @@ class StatusMenu(BaseMenu):
         print("\n=== AUTHENTICATION STATUS ===")
         
         if self.auth.is_authenticated():
-            print("✅ Authentication: ACTIVE")
+            print("âœ… Authentication: ACTIVE")
             username = self.config.get("auth.username")
             print(f"   User: {username}")
             
@@ -94,11 +94,11 @@ class StatusMenu(BaseMenu):
                         minutes = int((time_left.total_seconds() % 3600) // 60)
                         print(f"   Token expires in: {hours}h {minutes}m")
                     else:
-                        print("   ⚠️ Token expired")
+                        print("   âš ï¸ Token expired")
                 except:
-                    print("   ⚠️ Token expiry unknown")
+                    print("   âš ï¸ Token expiry unknown")
         else:
-            print("❌ Authentication: INACTIVE")
+            print("âŒ Authentication: INACTIVE")
             print("   No valid authentication credentials found.")
             print("   Use Setup menu to authenticate.")
         
@@ -109,7 +109,7 @@ class StatusMenu(BaseMenu):
         print("\n=== API CONNECTION STATUS ===")
         
         if not self.auth.is_authenticated():
-            print("❌ Cannot test API - not authenticated")
+            print("âŒ Cannot test API - not authenticated")
             input("\nPress Enter to continue...")
             return
         
@@ -118,7 +118,7 @@ class StatusMenu(BaseMenu):
         try:
             # Test basic connection
             if self.client.test_connection():
-                print("✅ API Connection: WORKING")
+                print("âœ… API Connection: WORKING")
                 print("   TopStepX Gateway API is responding")
                 
                 # Test account access
@@ -132,13 +132,13 @@ class StatusMenu(BaseMenu):
                     if len(accounts) > 3:
                         print(f"     ... and {len(accounts) - 3} more")
                 else:
-                    print("   ⚠️ No accounts found")
+                    print("   âš ï¸ No accounts found")
             else:
-                print("❌ API Connection: FAILED")
+                print("âŒ API Connection: FAILED")
                 print("   TopStepX Gateway API is not responding")
                 
         except Exception as e:
-            print(f"❌ API Connection: ERROR")
+            print(f"âŒ API Connection: ERROR")
             print(f"   Error: {e}")
         
         input("\nPress Enter to continue...")
@@ -149,7 +149,7 @@ class StatusMenu(BaseMenu):
         
         config_file = self.config.config_file
         if config_file.exists():
-            print(f"✅ Configuration File: {config_file}")
+            print(f"âœ… Configuration File: {config_file}")
             
             # Show key configuration sections
             print("\nConfiguration Sections:")
@@ -170,7 +170,7 @@ class StatusMenu(BaseMenu):
             print(f"   Trading Hours: {start_time} - {end_time}")
             
         else:
-            print("❌ Configuration File: MISSING")
+            print("âŒ Configuration File: MISSING")
             print("   Using default configuration")
         
         input("\nPress Enter to continue...")
@@ -183,7 +183,7 @@ class StatusMenu(BaseMenu):
             # Load risk rules
             risk_rules = RiskRules()
             
-            print("✅ Risk Rules: LOADED")
+            print("âœ… Risk Rules: LOADED")
             print("\nCurrent Rules:")
             
             # Daily Limits
@@ -193,7 +193,7 @@ class StatusMenu(BaseMenu):
                 print(f"   Daily Profit Target: ${daily.daily_profit_target:,.2f}")
                 print(f"   Max Daily Trades: {daily.max_daily_trades}")
             else:
-                print("   Daily Limits: ❌ Not loaded")
+                print("   Daily Limits: âŒ Not loaded")
             
             # Position Limits
             if risk_rules.position_limits:
@@ -202,7 +202,7 @@ class StatusMenu(BaseMenu):
                 print(f"   Max Open Positions: {position.max_open_positions}")
                 print(f"   Max Risk Per Trade: ${position.max_risk_per_trade:,.2f}")
             else:
-                print("   Position Limits: ❌ Not loaded")
+                print("   Position Limits: âŒ Not loaded")
             
             # Session Rules
             if risk_rules.session_rules:
@@ -211,10 +211,10 @@ class StatusMenu(BaseMenu):
                 print(f"   Stop on Loss: {'Enabled' if session.stop_on_loss else 'Disabled'}")
                 print(f"   Stop on Profit: {'Enabled' if session.stop_on_profit else 'Disabled'}")
             else:
-                print("   Session Rules: ❌ Not loaded")
+                print("   Session Rules: âŒ Not loaded")
             
         except Exception as e:
-            print("❌ Risk Rules: ERROR")
+            print("âŒ Risk Rules: ERROR")
             print(f"   Error loading rules: {e}")
         
         input("\nPress Enter to continue...")
@@ -257,7 +257,7 @@ class StatusMenu(BaseMenu):
         # Display results
         print("\nHealth Check Results:")
         for check_name, status in checks:
-            status_icon = "✅" if status else "❌"
+            status_icon = "âœ…" if status else "âŒ"
             status_text = "PASS" if status else "FAIL"
             print(f"   {status_icon} {check_name}: {status_text}")
         
@@ -268,11 +268,11 @@ class StatusMenu(BaseMenu):
         print(f"\nOverall Health: {passed_checks}/{total_checks} checks passed")
         
         if passed_checks == total_checks:
-            print("🎉 System is healthy and ready for monitoring!")
+            print("ðŸŽ‰ System is healthy and ready for monitoring!")
         elif passed_checks >= total_checks * 0.75:
-            print("⚠️ System is mostly healthy, some issues detected.")
+            print("âš ï¸ System is mostly healthy, some issues detected.")
         else:
-            print("❌ System has multiple issues that need attention.")
+            print("âŒ System has multiple issues that need attention.")
         
         input("\nPress Enter to continue...")
 
@@ -281,8 +281,9 @@ if __name__ == "__main__":
     
     # Test basic initialization
     status_menu = StatusMenu()
-    print("✅ StatusMenu created successfully!")
+    print("âœ… StatusMenu created successfully!")
     
     # Test menu display
     status_menu.display_menu()
-    print("✅ StatusMenu test completed!")
+    print("âœ… StatusMenu test completed!")
+

@@ -1,11 +1,11 @@
-"""
+﻿"""
 Risk Enforcer
 
 Executes automated enforcement actions when risk violations are detected.
 """
 
 from typing import Dict, Optional, List
-from core.logger import get_logger
+from risk_manager_v2.core.logger import get_logger
 
 class RiskEnforcer:
     """Executes automated risk enforcement actions."""
@@ -291,13 +291,14 @@ if __name__ == "__main__":
     print("Testing RiskEnforcer...")
     
     # Test basic initialization
-    from core.client import ProjectXClient
+    from risk_manager_v2.core.client import ProjectXClient
     client = ProjectXClient()
     enforcer = RiskEnforcer(client)
-    print("✅ RiskEnforcer created successfully!")
+    print("âœ… RiskEnforcer created successfully!")
     
     # Test enforcement summary
     summary = enforcer.get_enforcement_summary("123")
-    print(f"✅ Enforcement summary: {summary}")
+    print(f"âœ… Enforcement summary: {summary}")
     
-    print("✅ RiskEnforcer test completed!")
+    print("âœ… RiskEnforcer test completed!")
+

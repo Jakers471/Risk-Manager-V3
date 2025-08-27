@@ -1,4 +1,4 @@
-"""
+﻿"""
 Orders View Menu
 
 Handles viewing pending orders.
@@ -18,7 +18,7 @@ class OrdersViewMenu(BaseMenu):
         print("\n=== PENDING ORDERS ===")
         
         if not self.auth.is_authenticated():
-            print("❌ Not authenticated")
+            print("âŒ Not authenticated")
             return
         
         account_id = input("Enter Account ID: ").strip()
@@ -106,11 +106,12 @@ if __name__ == "__main__":
     
     # Test basic initialization
     orders_view = OrdersViewMenu()
-    print("✅ OrdersViewMenu created successfully!")
+    print("âœ… OrdersViewMenu created successfully!")
     
     # Test display orders (will fail without auth, but should not crash)
     try:
         orders_view.view_orders()
-        print("✅ OrdersViewMenu test completed!")
+        print("âœ… OrdersViewMenu test completed!")
     except Exception as e:
-        print(f"✅ OrdersViewMenu test completed (expected error without auth): {e}")
+        print(f"âœ… OrdersViewMenu test completed (expected error without auth): {e}")
+

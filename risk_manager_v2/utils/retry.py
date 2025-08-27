@@ -1,4 +1,4 @@
-"""
+﻿"""
 Retry utilities with exponential backoff and circuit breaker.
 
 Provides robust retry mechanisms for API calls and network operations.
@@ -8,7 +8,7 @@ import time
 import random
 import functools
 from typing import Callable, Any, Optional, List, Dict, Union
-from core.logger import get_logger
+from risk_manager_v2.core.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -348,38 +348,39 @@ if __name__ == "__main__":
     
     # Test circuit breaker
     circuit_breaker = CircuitBreaker(failure_threshold=3, recovery_timeout=10.0)
-    print("✅ CircuitBreaker created successfully!")
+    print("âœ… CircuitBreaker created successfully!")
     
     # Test TopStepX retry handler
     retry_handler = TopStepXRetryHandler()
-    print("✅ TopStepXRetryHandler created successfully!")
+    print("âœ… TopStepXRetryHandler created successfully!")
     
     # Test retry decorators
     @retry_on_exception(tries=2, base=0.1, max_wait=1.0)
     def test_retry_function():
         return "Retry function executed successfully"
     
-    print("✅ Retry decorator created successfully!")
+    print("âœ… Retry decorator created successfully!")
     
     # Test TopStepX retry decorator
     @topstepx_retry(max_retries=2, base_delay=0.1, max_delay=1.0)
     def test_topstepx_function():
         return "TopStepX function executed successfully"
     
-    print("✅ TopStepX retry decorator created successfully!")
+    print("âœ… TopStepX retry decorator created successfully!")
     
     # Test circuit breaker decorator
     @retry_with_circuit_breaker(failure_threshold=2, recovery_timeout=5.0, max_retries=2)
     def test_circuit_breaker_function():
         return "Circuit breaker function executed successfully"
     
-    print("✅ Circuit breaker decorator created successfully!")
+    print("âœ… Circuit breaker decorator created successfully!")
     
     # Test smart retry decorator
     @smart_retry(api_type="enforcement", critical=True)
     def test_smart_retry_function():
         return "Smart retry function executed successfully"
     
-    print("✅ Smart retry decorator created successfully!")
+    print("âœ… Smart retry decorator created successfully!")
     
-    print("✅ Retry utilities test completed!")
+    print("âœ… Retry utilities test completed!")
+

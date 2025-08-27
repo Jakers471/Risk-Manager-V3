@@ -1,4 +1,4 @@
-"""
+﻿"""
 Risk Calculator
 
 Calculates risk metrics and checks for rule violations.
@@ -6,7 +6,7 @@ Calculates risk metrics and checks for rule violations.
 
 from datetime import datetime, date
 from typing import Dict, List, Optional
-from core.logger import get_logger
+from risk_manager_v2.core.logger import get_logger
 
 class RiskCalculator:
     """Calculates risk metrics and detects violations."""
@@ -264,7 +264,7 @@ if __name__ == "__main__":
     
     # Test basic initialization
     calculator = RiskCalculator()
-    print("✅ RiskCalculator created successfully!")
+    print("âœ… RiskCalculator created successfully!")
     
     # Test metrics calculation with TopStepX API structure
     account_data = {
@@ -296,14 +296,15 @@ if __name__ == "__main__":
     ]
     
     metrics = calculator.calculate_risk_metrics(account_data, positions, trades, None)
-    print(f"✅ Metrics calculated: {metrics}")
+    print(f"âœ… Metrics calculated: {metrics}")
     
     # Test violation checking
     violations = calculator.check_violations(metrics, None)
-    print(f"✅ Violations checked: {len(violations)} violations")
+    print(f"âœ… Violations checked: {len(violations)} violations")
     
     # Test risk summary
     summary = calculator.get_risk_summary(metrics, violations)
-    print(f"✅ Risk summary: {summary}")
+    print(f"âœ… Risk summary: {summary}")
     
-    print("✅ RiskCalculator test completed!")
+    print("âœ… RiskCalculator test completed!")
+

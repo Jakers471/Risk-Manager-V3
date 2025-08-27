@@ -1,4 +1,4 @@
-"""
+﻿"""
 Account Data Models
 
 Handles account information, balance, and performance data.
@@ -279,19 +279,20 @@ if __name__ == "__main__":
     
     # Test AccountBalance
     balance = AccountBalance(cash=10000.0, buying_power=9500.0, equity=10500.0)
-    print("✅ AccountBalance created!")
+    print("âœ… AccountBalance created!")
     print(f"Margin Utilization: {balance.get_margin_utilization():.1f}%")
     print(f"Total P&L: ${balance.get_total_pnl():.2f}")
     
     # Test AccountPerformance
     performance = AccountPerformance(total_trades=100, winning_trades=65, average_win=150.0, average_loss=100.0)
-    print("✅ AccountPerformance created!")
+    print("âœ… AccountPerformance created!")
     print(f"Win Rate: {performance.calculate_win_rate():.1f}%")
     print(f"Profit Factor: {performance.get_profit_factor():.2f}")
     
     # Test Account
     account = Account(account_id="12345", name="Test Account", balance=balance, performance=performance)
-    print("✅ Account created!")
+    print("âœ… Account created!")
     print(f"Account Status: {account.get_account_status()}")
     
-    print("✅ Account models test completed!")
+    print("âœ… Account models test completed!")
+

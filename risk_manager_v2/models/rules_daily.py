@@ -1,4 +1,4 @@
-"""
+﻿"""
 Daily Limits Rule
 
 Handles daily loss, profit, and trade count limits.
@@ -135,22 +135,23 @@ if __name__ == "__main__":
     
     # Test basic initialization
     daily_limits = DailyLimits()
-    print("✅ DailyLimits created successfully!")
+    print("âœ… DailyLimits created successfully!")
     
     # Test validation
     try:
         daily_limits.validate()
-        print("✅ Validation passed!")
+        print("âœ… Validation passed!")
     except ValueError as e:
-        print(f"❌ Validation failed: {e}")
+        print(f"âŒ Validation failed: {e}")
     
     # Test risk status
     status = daily_limits.get_risk_status(500.0, 1000.0, 5, 50000.0)
-    print(f"✅ Risk status: {status}")
+    print(f"âœ… Risk status: {status}")
     
     # Test to_dict/from_dict
     data = daily_limits.to_dict()
     restored = DailyLimits.from_dict(data)
-    print(f"✅ Serialization test: {restored.to_dict()}")
+    print(f"âœ… Serialization test: {restored.to_dict()}")
     
-    print("✅ DailyLimits test completed!")
+    print("âœ… DailyLimits test completed!")
+

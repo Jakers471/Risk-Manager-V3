@@ -1,4 +1,4 @@
-"""
+﻿"""
 Trading Positions Data Model
 
 Handles position information and management.
@@ -120,22 +120,23 @@ if __name__ == "__main__":
         size=1,
         average_price=2100.0
     )
-    print("✅ Position created successfully!")
+    print("âœ… Position created successfully!")
     
     # Test validation
     try:
         position.validate()
-        print("✅ Position validation passed!")
+        print("âœ… Position validation passed!")
     except ValueError as e:
-        print(f"❌ Position validation failed: {e}")
+        print(f"âŒ Position validation failed: {e}")
     
     # Test position info
     info = position.get_position_info()
-    print(f"✅ Position info: {info}")
+    print(f"âœ… Position info: {info}")
     
     # Test P&L calculation
     current_price = 2105.0
     pnl = position.get_unrealized_pnl(current_price)
-    print(f"✅ Unrealized P&L at ${current_price}: ${pnl}")
+    print(f"âœ… Unrealized P&L at ${current_price}: ${pnl}")
     
-    print("✅ Position model test completed!")
+    print("âœ… Position model test completed!")
+

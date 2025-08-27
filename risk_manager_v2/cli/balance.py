@@ -1,4 +1,4 @@
-"""
+﻿"""
 Balance Menu
 
 Handles viewing account balance and performance metrics.
@@ -40,7 +40,7 @@ class BalanceMenu(BaseMenu):
         print("\n=== ACCOUNT BALANCE ===")
         
         if not self.auth.is_authenticated():
-            print("❌ Not authenticated")
+            print("âŒ Not authenticated")
             return
         
         account_id = input("Enter Account ID: ").strip()
@@ -68,7 +68,7 @@ class BalanceMenu(BaseMenu):
         print("\n=== MARGIN INFORMATION ===")
         
         if not self.auth.is_authenticated():
-            print("❌ Not authenticated")
+            print("âŒ Not authenticated")
             return
         
         account_id = input("Enter Account ID: ").strip()
@@ -97,7 +97,7 @@ class BalanceMenu(BaseMenu):
         print("\n=== PERFORMANCE METRICS ===")
         
         if not self.auth.is_authenticated():
-            print("❌ Not authenticated")
+            print("âŒ Not authenticated")
             return
         
         account_id = input("Enter Account ID: ").strip()
@@ -187,11 +187,11 @@ class BalanceMenu(BaseMenu):
         
         # Margin warnings
         if margin_utilization > 80:
-            print("⚠️  WARNING: High margin utilization!")
+            print("âš ï¸  WARNING: High margin utilization!")
         elif margin_utilization > 60:
-            print("⚠️  CAUTION: Moderate margin utilization")
+            print("âš ï¸  CAUTION: Moderate margin utilization")
         else:
-            print("✅ Margin utilization is healthy")
+            print("âœ… Margin utilization is healthy")
     
     def display_performance_metrics(self, account, trades):
         """Display performance metrics."""
@@ -262,21 +262,22 @@ class BalanceMenu(BaseMenu):
         # Performance rating
         if net_pnl > 0:
             if win_rate > 60:
-                print("\n🎯 Performance Rating: EXCELLENT")
+                print("\nðŸŽ¯ Performance Rating: EXCELLENT")
             elif win_rate > 50:
-                print("\n✅ Performance Rating: GOOD")
+                print("\nâœ… Performance Rating: GOOD")
             else:
-                print("\n⚠️  Performance Rating: NEEDS IMPROVEMENT")
+                print("\nâš ï¸  Performance Rating: NEEDS IMPROVEMENT")
         else:
-            print("\n❌ Performance Rating: LOSS")
+            print("\nâŒ Performance Rating: LOSS")
 
 if __name__ == "__main__":
     print("Testing BalanceMenu...")
     
     # Test basic initialization
     balance = BalanceMenu()
-    print("✅ BalanceMenu created successfully!")
+    print("âœ… BalanceMenu created successfully!")
     
     # Test display menu
     balance.display_menu()
-    print("✅ BalanceMenu test completed!")
+    print("âœ… BalanceMenu test completed!")
+

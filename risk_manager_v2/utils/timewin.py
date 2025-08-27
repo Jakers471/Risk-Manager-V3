@@ -1,4 +1,4 @@
-"""
+﻿"""
 Trading time window utilities with advanced session handling.
 
 Handles trading hours, session windows, and market timing logic.
@@ -7,7 +7,7 @@ Handles trading hours, session windows, and market timing logic.
 from datetime import datetime, time, timedelta
 from typing import Optional, List, Dict, Any
 import pytz
-from core.logger import get_logger
+from risk_manager_v2.core.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -317,29 +317,30 @@ if __name__ == "__main__":
     
     # Test trading session
     session = TradingSession("regular", "09:30", "16:00")
-    print("✅ TradingSession created successfully!")
+    print("âœ… TradingSession created successfully!")
     
     # Test trading calendar
     calendar = create_standard_calendar()
-    print("✅ TradingCalendar created successfully!")
+    print("âœ… TradingCalendar created successfully!")
     
     # Test market status
     status = get_market_status()
-    print("✅ Market status retrieved successfully!")
+    print("âœ… Market status retrieved successfully!")
     print(f"Market open: {status['market_open']}")
     print(f"Active session: {status['active_session']}")
     
     # Test TopStepX market status
     topstepx_status = get_topstepx_market_status()
-    print("✅ TopStepX market status retrieved successfully!")
+    print("âœ… TopStepX market status retrieved successfully!")
     print(f"Platform: {topstepx_status['platform']}")
     
     # Test duration formatting
     formatted = format_duration(3661)  # 1 hour, 1 minute, 1 second
-    print(f"✅ Duration formatting: {formatted}")
+    print(f"âœ… Duration formatting: {formatted}")
     
     # Test next trading day
     next_day = get_next_trading_day()
-    print(f"✅ Next trading day: {next_day.strftime('%Y-%m-%d %H:%M')}")
+    print(f"âœ… Next trading day: {next_day.strftime('%Y-%m-%d %H:%M')}")
     
-    print("✅ Trading Time Window utilities test completed!")
+    print("âœ… Trading Time Window utilities test completed!")
+

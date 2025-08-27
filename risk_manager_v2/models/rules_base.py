@@ -1,4 +1,4 @@
-"""
+﻿"""
 Base Rule Class
 
 Foundation for all rule types - makes adding new rules easy.
@@ -131,8 +131,9 @@ if __name__ == "__main__":
         RuleValidator.validate_boolean(True, "enabled")
         RuleValidator.validate_string("test", "name")
         RuleValidator.validate_range(50.0, "percentage", 0.0, 100.0)
-        print("✅ All validation tests passed!")
+        print("âœ… All validation tests passed!")
     except ValueError as e:
-        print(f"❌ Validation test failed: {e}")
+        print(f"âŒ Validation test failed: {e}")
     
-    print("✅ BaseRule test completed!")
+    print("âœ… BaseRule test completed!")
+

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Auto-Enforcement Engine
 
 Real-time monitoring and automated risk management system.
@@ -45,3 +45,4 @@ __all__ = [
 __version__ = "1.0.0"
 __author__ = "Risk Manager V3 Team"
 __description__ = "Real-time automated risk management system for TopStepX trading"
+

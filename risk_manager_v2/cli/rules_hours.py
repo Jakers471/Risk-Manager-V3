@@ -1,4 +1,4 @@
-"""
+﻿"""
 Trading Hours Rules
 
 Handles trading hours and timezone configuration.
@@ -62,29 +62,29 @@ class RulesHoursMenu(BaseMenu):
         
         print(f"Regular Hours: {start_time} - {end_time}")
         print(f"Timezone: {timezone}")
-        print(f"Pre-Market: {pre_market_start} - {pre_market_end} {'✅ ENABLED' if enable_pre_market else '❌ DISABLED'}")
-        print(f"After-Hours: {after_hours_start} - {after_hours_end} {'✅ ENABLED' if enable_after_hours else '❌ DISABLED'}")
+        print(f"Pre-Market: {pre_market_start} - {pre_market_end} {'âœ… ENABLED' if enable_pre_market else 'âŒ DISABLED'}")
+        print(f"After-Hours: {after_hours_start} - {after_hours_end} {'âœ… ENABLED' if enable_after_hours else 'âŒ DISABLED'}")
         
         # Show session status
         print("\nSession Status:")
         if self._is_valid_time_range(start_time, end_time):
-            print("✅ Regular hours: VALID")
+            print("âœ… Regular hours: VALID")
         else:
-            print("❌ Regular hours: INVALID (start > end)")
+            print("âŒ Regular hours: INVALID (start > end)")
             
         if enable_pre_market and self._is_valid_time_range(pre_market_start, pre_market_end):
-            print("✅ Pre-market hours: VALID")
+            print("âœ… Pre-market hours: VALID")
         elif enable_pre_market:
-            print("❌ Pre-market hours: INVALID")
+            print("âŒ Pre-market hours: INVALID")
         else:
-            print("❌ Pre-market hours: DISABLED")
+            print("âŒ Pre-market hours: DISABLED")
             
         if enable_after_hours and self._is_valid_time_range(after_hours_start, after_hours_end):
-            print("✅ After-hours: VALID")
+            print("âœ… After-hours: VALID")
         elif enable_after_hours:
-            print("❌ After-hours: INVALID")
+            print("âŒ After-hours: INVALID")
         else:
-            print("❌ After-hours: DISABLED")
+            print("âŒ After-hours: DISABLED")
         
         input("\nPress Enter to continue...")
     
@@ -106,17 +106,17 @@ class RulesHoursMenu(BaseMenu):
                     if self._is_valid_time_range(new_start, new_end):
                         self.config.set('trading_hours.start', new_start)
                         self.config.set('trading_hours.end', new_end)
-                        print(f"✅ Regular hours set to {new_start} - {new_end}")
+                        print(f"âœ… Regular hours set to {new_start} - {new_end}")
                     else:
-                        print("❌ Invalid time range. Start time must be before end time.")
+                        print("âŒ Invalid time range. Start time must be before end time.")
                 else:
-                    print("❌ Invalid end time format. Use HH:MM")
+                    print("âŒ Invalid end time format. Use HH:MM")
             else:
-                print("❌ Invalid start time format. Use HH:MM")
+                print("âŒ Invalid start time format. Use HH:MM")
                 
         except Exception as e:
             self.logger.error(f"Error setting regular hours: {e}")
-            print("❌ Error saving configuration.")
+            print("âŒ Error saving configuration.")
         
         input("\nPress Enter to continue...")
     
@@ -127,7 +127,7 @@ class RulesHoursMenu(BaseMenu):
         enabled = self.config.get('trading_hours.enable_pre_market', False)
         
         print(f"\n=== SET PRE-MARKET HOURS ===")
-        print(f"Current Pre-Market: {current_start} - {current_end} {'✅ ENABLED' if enabled else '❌ DISABLED'}")
+        print(f"Current Pre-Market: {current_start} - {current_end} {'âœ… ENABLED' if enabled else 'âŒ DISABLED'}")
         
         # Toggle enable/disable
         toggle = input("Enable pre-market trading? (y/N): ").strip().lower()
@@ -143,20 +143,20 @@ class RulesHoursMenu(BaseMenu):
                             self.config.set('trading_hours.pre_market_start', new_start)
                             self.config.set('trading_hours.pre_market_end', new_end)
                             self.config.set('trading_hours.enable_pre_market', True)
-                            print(f"✅ Pre-market hours enabled: {new_start} - {new_end}")
+                            print(f"âœ… Pre-market hours enabled: {new_start} - {new_end}")
                         else:
-                            print("❌ Invalid time range. Start time must be before end time.")
+                            print("âŒ Invalid time range. Start time must be before end time.")
                     else:
-                        print("❌ Invalid end time format. Use HH:MM")
+                        print("âŒ Invalid end time format. Use HH:MM")
                 else:
-                    print("❌ Invalid start time format. Use HH:MM")
+                    print("âŒ Invalid start time format. Use HH:MM")
                     
             except Exception as e:
                 self.logger.error(f"Error setting pre-market hours: {e}")
-                print("❌ Error saving configuration.")
+                print("âŒ Error saving configuration.")
         else:
             self.config.set('trading_hours.enable_pre_market', False)
-            print("✅ Pre-market trading disabled")
+            print("âœ… Pre-market trading disabled")
         
         input("\nPress Enter to continue...")
     
@@ -167,7 +167,7 @@ class RulesHoursMenu(BaseMenu):
         enabled = self.config.get('trading_hours.enable_after_hours', False)
         
         print(f"\n=== SET AFTER-HOURS TRADING ===")
-        print(f"Current After-Hours: {current_start} - {current_end} {'✅ ENABLED' if enabled else '❌ DISABLED'}")
+        print(f"Current After-Hours: {current_start} - {current_end} {'âœ… ENABLED' if enabled else 'âŒ DISABLED'}")
         
         # Toggle enable/disable
         toggle = input("Enable after-hours trading? (y/N): ").strip().lower()
@@ -183,20 +183,20 @@ class RulesHoursMenu(BaseMenu):
                             self.config.set('trading_hours.after_hours_start', new_start)
                             self.config.set('trading_hours.after_hours_end', new_end)
                             self.config.set('trading_hours.enable_after_hours', True)
-                            print(f"✅ After-hours enabled: {new_start} - {new_end}")
+                            print(f"âœ… After-hours enabled: {new_start} - {new_end}")
                         else:
-                            print("❌ Invalid time range. Start time must be before end time.")
+                            print("âŒ Invalid time range. Start time must be before end time.")
                     else:
-                        print("❌ Invalid end time format. Use HH:MM")
+                        print("âŒ Invalid end time format. Use HH:MM")
                 else:
-                    print("❌ Invalid start time format. Use HH:MM")
+                    print("âŒ Invalid start time format. Use HH:MM")
                     
             except Exception as e:
                 self.logger.error(f"Error setting after-hours: {e}")
-                print("❌ Error saving configuration.")
+                print("âŒ Error saving configuration.")
         else:
             self.config.set('trading_hours.enable_after_hours', False)
-            print("✅ After-hours trading disabled")
+            print("âœ… After-hours trading disabled")
         
         input("\nPress Enter to continue...")
     
@@ -232,20 +232,20 @@ class RulesHoursMenu(BaseMenu):
             if choice in timezone_map:
                 new_tz = timezone_map[choice]
                 self.config.set('trading_hours.timezone', new_tz)
-                print(f"✅ Timezone set to {new_tz}")
+                print(f"âœ… Timezone set to {new_tz}")
             elif choice == '8':
                 custom_tz = input("Enter custom timezone (e.g., America/New_York): ").strip()
                 if custom_tz:
                     self.config.set('trading_hours.timezone', custom_tz)
-                    print(f"✅ Timezone set to {custom_tz}")
+                    print(f"âœ… Timezone set to {custom_tz}")
                 else:
-                    print("❌ No timezone entered.")
+                    print("âŒ No timezone entered.")
             else:
-                print("❌ Invalid choice.")
+                print("âŒ Invalid choice.")
                 
         except Exception as e:
             self.logger.error(f"Error setting timezone: {e}")
-            print("❌ Error saving configuration.")
+            print("âŒ Error saving configuration.")
         
         input("\nPress Enter to continue...")
     
@@ -259,9 +259,9 @@ class RulesHoursMenu(BaseMenu):
         allow_pre_market = self.config.get('trading_hours.allow_pre_market', False)
         allow_after_hours = self.config.get('trading_hours.allow_after_hours', False)
         
-        print(f"1) Regular Hours: {'✅ ALLOWED' if allow_regular else '❌ BLOCKED'}")
-        print(f"2) Pre-Market: {'✅ ALLOWED' if allow_pre_market else '❌ BLOCKED'}")
-        print(f"3) After-Hours: {'✅ ALLOWED' if allow_after_hours else '❌ BLOCKED'}")
+        print(f"1) Regular Hours: {'âœ… ALLOWED' if allow_regular else 'âŒ BLOCKED'}")
+        print(f"2) Pre-Market: {'âœ… ALLOWED' if allow_pre_market else 'âŒ BLOCKED'}")
+        print(f"3) After-Hours: {'âœ… ALLOWED' if allow_after_hours else 'âŒ BLOCKED'}")
         
         choice = input("Select session to toggle (1-3): ").strip()
         
@@ -269,21 +269,21 @@ class RulesHoursMenu(BaseMenu):
             if choice == '1':
                 new_value = not allow_regular
                 self.config.set('trading_hours.allow_regular', new_value)
-                print(f"✅ Regular hours: {'ALLOWED' if new_value else 'BLOCKED'}")
+                print(f"âœ… Regular hours: {'ALLOWED' if new_value else 'BLOCKED'}")
             elif choice == '2':
                 new_value = not allow_pre_market
                 self.config.set('trading_hours.allow_pre_market', new_value)
-                print(f"✅ Pre-market: {'ALLOWED' if new_value else 'BLOCKED'}")
+                print(f"âœ… Pre-market: {'ALLOWED' if new_value else 'BLOCKED'}")
             elif choice == '3':
                 new_value = not allow_after_hours
                 self.config.set('trading_hours.allow_after_hours', new_value)
-                print(f"✅ After-hours: {'ALLOWED' if new_value else 'BLOCKED'}")
+                print(f"âœ… After-hours: {'ALLOWED' if new_value else 'BLOCKED'}")
             else:
-                print("❌ Invalid choice.")
+                print("âŒ Invalid choice.")
                 
         except Exception as e:
             self.logger.error(f"Error setting session types: {e}")
-            print("❌ Error saving configuration.")
+            print("âŒ Error saving configuration.")
         
         input("\nPress Enter to continue...")
     
@@ -313,8 +313,9 @@ if __name__ == "__main__":
     
     # Test basic initialization
     hours_rules = RulesHoursMenu()
-    print("✅ RulesHoursMenu created successfully!")
+    print("âœ… RulesHoursMenu created successfully!")
     
     # Test display menu
     hours_rules.display_menu()
-    print("✅ RulesHoursMenu test completed!")
+    print("âœ… RulesHoursMenu test completed!")
+

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Orders Place Menu
 
 Handles placing new orders (market, limit, stop).
@@ -74,7 +74,7 @@ class OrdersPlaceMenu(BaseMenu):
         print("\n=== PLACE MARKET ORDER ===")
         
         if not self.auth.is_authenticated():
-            print("❌ Not authenticated")
+            print("âŒ Not authenticated")
             return
         
         # Get order details
@@ -122,11 +122,11 @@ class OrdersPlaceMenu(BaseMenu):
             
             if result and result.get("success"):
                 order_id = result.get("orderId", "N/A")
-                print(f"✅ Market order placed successfully!")
+                print(f"âœ… Market order placed successfully!")
                 print(f"Order ID: {order_id}")
             else:
                 error_msg = result.get("errorMessage", "Unknown error") if result else "No response"
-                print(f"❌ Failed to place market order: {error_msg}")
+                print(f"âŒ Failed to place market order: {error_msg}")
                 
         except Exception as e:
             self.logger.error(f"Error placing market order: {e}")
@@ -139,7 +139,7 @@ class OrdersPlaceMenu(BaseMenu):
         print("\n=== PLACE LIMIT ORDER ===")
         
         if not self.auth.is_authenticated():
-            print("❌ Not authenticated")
+            print("âŒ Not authenticated")
             return
         
         # Get order details
@@ -190,11 +190,11 @@ class OrdersPlaceMenu(BaseMenu):
             
             if result and result.get("success"):
                 order_id = result.get("orderId", "N/A")
-                print(f"✅ Limit order placed successfully!")
+                print(f"âœ… Limit order placed successfully!")
                 print(f"Order ID: {order_id}")
             else:
                 error_msg = result.get("errorMessage", "Unknown error") if result else "No response"
-                print(f"❌ Failed to place limit order: {error_msg}")
+                print(f"âŒ Failed to place limit order: {error_msg}")
                 
         except Exception as e:
             self.logger.error(f"Error placing limit order: {e}")
@@ -207,7 +207,7 @@ class OrdersPlaceMenu(BaseMenu):
         print("\n=== PLACE STOP ORDER ===")
         
         if not self.auth.is_authenticated():
-            print("❌ Not authenticated")
+            print("âŒ Not authenticated")
             return
         
         # Get order details
@@ -265,11 +265,11 @@ class OrdersPlaceMenu(BaseMenu):
             
             if result and result.get("success"):
                 order_id = result.get("orderId", "N/A")
-                print(f"✅ Stop order placed successfully!")
+                print(f"âœ… Stop order placed successfully!")
                 print(f"Order ID: {order_id}")
             else:
                 error_msg = result.get("errorMessage", "Unknown error") if result else "No response"
-                print(f"❌ Failed to place stop order: {error_msg}")
+                print(f"âŒ Failed to place stop order: {error_msg}")
                 
         except Exception as e:
             self.logger.error(f"Error placing stop order: {e}")
@@ -282,8 +282,9 @@ if __name__ == "__main__":
     
     # Test basic initialization
     orders_place = OrdersPlaceMenu()
-    print("✅ OrdersPlaceMenu created successfully!")
+    print("âœ… OrdersPlaceMenu created successfully!")
     
     # Test display menu
     orders_place.display_menu()
-    print("✅ OrdersPlaceMenu test completed!")
+    print("âœ… OrdersPlaceMenu test completed!")
+

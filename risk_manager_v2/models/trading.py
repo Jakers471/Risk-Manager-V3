@@ -1,4 +1,4 @@
-"""
+﻿"""
 Trading Data Models Router
 
 Routes to different trading data modules.
@@ -165,10 +165,11 @@ if __name__ == "__main__":
     
     # Test basic initialization
     trading_data = TradingData()
-    print("✅ TradingData created successfully!")
+    print("âœ… TradingData created successfully!")
     
     # Test summary
     summary = trading_data.get_trading_summary()
-    print(f"✅ Trading summary: {summary}")
+    print(f"âœ… Trading summary: {summary}")
     
-    print("✅ TradingData router test completed!")
+    print("âœ… TradingData router test completed!")
+
