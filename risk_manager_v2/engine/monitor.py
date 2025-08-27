@@ -45,7 +45,7 @@ def _map_position_data(position: Position) -> Position:
         qty=float(position.size),
         entry_price=float(position.average_price),
         unrealized_pnl=0.0,  # Will be calculated later
-        side="long" if position.side.value == 0 else "short"
+        side="long" if position.side.value == 1 else "short"
     )
 
 def client_get_orders(acct: str) -> List[Order]:
