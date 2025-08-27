@@ -22,3 +22,10 @@ MODULARIZATION POLICY
 - Keep PRs small: ≤5 files and ideally ≤400 LOC total; otherwise split into follow-up PRs.
 - No new dependencies. Do NOT touch DO NOT TOUCH paths.
 - Keep Import Smoke green: avoid heavy work at module import time.
+
+MODULARIZATION POLICY
+- If a change approaches ~400 LOC, you MAY split code across up to 1–3 files INSIDE your OWN paths only:
+  OWN: risk_manager_v2/engine/monitor.py, risk_manager_v2/cli/monitoring.py
+- Keep PRs small: ≤5 files and ideally ≤400 LOC total; otherwise split into follow-up PRs.
+- No new dependencies. Do NOT touch DO NOT TOUCH paths.
+- Keep Import Smoke green: avoid heavy work at module import time.
