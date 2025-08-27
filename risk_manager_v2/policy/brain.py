@@ -38,7 +38,15 @@ class PolicyBrain:
         cid = uuid.uuid4().hex
         plan = ActionPlan(correlation_id=cid)
         
-        tier_config = self.policy_config["tiers"].get(ctx.risk_tier, self.policy_config["tiers"]["t0"])
+        # Get tier config with fallback
+        tiers = self.policy_config.get("tiers", {})
+        tier_config = tiers.get(ctx.risk_tier, tiers.get("t0", {
+            "daily_loss": -150, 
+            "max_contracts": 1, 
+            "max_per_symbol": 1, 
+            "news_blackout_min": 15, 
+            "late_session_min": 10
+        }))
         
         # 1) Daily Loss Protection
         if ctx.day_pnl <= tier_config["daily_loss"] * 0.95:
