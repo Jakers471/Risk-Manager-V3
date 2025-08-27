@@ -23,20 +23,37 @@ class MonitoringMenu:
         self.monitor = RiskMonitor()
         self.dry_run = bool(self.config.get("monitor.dry_run", True))
         self.rate_limiter = TopStepXRateLimiter() if TopStepXRateLimiter else None
+        
+        # Update monitor's dry_run setting
+        self.monitor.dry_run = self.dry_run
 
     def run(self):
+        """Run the monitoring menu."""
         while True:
-            self._display_menu()
-            c = input("Choice: ").strip()
-            if c == "1": self._start()
-            elif c == "2": self._stop()
-            elif c == "3": self._status()
-            elif c == "4": self._toggle_dry_run()
-            elif c == "0": break
-            else: print("Invalid choice.")
+            try:
+                self._display_menu()
+                c = input("Choice: ").strip()
+                if c == "1": 
+                    self._start()
+                elif c == "2": 
+                    self._stop()
+                elif c == "3": 
+                    self._status()
+                elif c == "4": 
+                    self._toggle_dry_run()
+                elif c == "0": 
+                    break
+                else: 
+                    print("Invalid choice.")
+            except KeyboardInterrupt:
+                print("\n\nReturning to main menu...")
+                break
+            except Exception as e:
+                print(f"Error: {e}")
+                input("Press Enter to continue...")
 
     def _display_menu(self):
-        s = "ðŸŸ¢ RUNNING" if self.monitor.is_running() else "ðŸ”´ STOPPED"
+        s = "🟢 RUNNING" if self.monitor.is_running() else "🔴 STOPPED"
         print(f"\n=== MONITORING CONTROL [{s}] ===")
         print("1) Start Monitoring")
         print("2) Stop Monitoring")
@@ -45,15 +62,20 @@ class MonitoringMenu:
         print("0) Back to main menu")
 
     def _start(self):
-        if self.monitor.is_running(): return print("Already running.")
+        if self.monitor.is_running(): 
+            print("Already running.")
+            return
+        
         if not self.auth.is_authenticated():
-            print("âŒ Not authenticated. Use Setup first."); return
+            print("❌ Not authenticated. Use Setup first.")
+            return
+        
         ok = self.monitor.start_monitoring(self.client, self.rate_limiter, self.dry_run)
-        print("âœ… Started." if ok else "âŒ Failed to start.")
+        print("✅ Started." if ok else "❌ Failed to start.")
 
     def _stop(self):
         ok = self.monitor.stop_monitoring()
-        print("âœ… Stopped." if ok else "âŒ Failed to stop.")
+        print("✅ Stopped." if ok else "❌ Failed to stop.")
 
     def _status(self):
         st = self.monitor.get_monitoring_status()
@@ -71,15 +93,19 @@ class MonitoringMenu:
         input("\nPress Enter to continue...")
 
     def _toggle_dry_run(self):
+        """Toggle dry run mode."""
         self.dry_run = not self.dry_run
         try:
-            self.config.set("monitor.dry_run", self.dry_run); self.config.save()
-        except Exception:
-            pass
-        if hasattr(self.monitor.enforcer, "set_dry_run"):
-            self.monitor.enforcer.set_dry_run(self.dry_run)
-        else:
-            setattr(self.monitor.enforcer, "dry_run", self.dry_run)
-        print("Dry run is now:", self.dry_run)
+            self.config.set("monitor.dry_run", self.dry_run)
+            self.config.save()
+        except Exception as e:
+            self.log.warning(f"Failed to save dry_run setting: {e}")
+        
+        # Update monitor's dry_run setting
+        self.monitor.dry_run = self.dry_run
+        
+        print(f"Dry run is now: {self.dry_run}")
+        if self.monitor.is_running():
+            print("Note: Changes will take effect on next evaluation cycle")
 
 

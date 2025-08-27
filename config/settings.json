@@ -1,0 +1,49 @@
+{
+  "api": {
+    "base_url": "https://gateway-api-demo.s2f.projectx.com",
+    "user_hub": "https://gateway-rtc-demo.s2f.projectx.com/hubs/user",
+    "market_hub": "https://gateway-rtc-demo.s2f.projectx.com/hubs/market",
+    "timeout": 30,
+    "max_retries": 3
+  },
+  "auth": {
+    "userName": "",
+    "api_key": "",
+    "token": "",
+    "token_expiry": ""
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "logs/risk_manager.log",
+    "max_size": "10MB",
+    "backup_count": 5
+  },
+  "risk": {
+    "max_daily_loss": 1000.0,
+    "daily_profit_target": 2000.0,
+    "max_daily_trades": 10,
+    "max_daily_volume": 100000.0,
+    "max_position_size": 10,
+    "max_open_positions": 5,
+    "max_risk_per_trade": 500.0,
+    "auto_flatten": true,
+    "stop_on_loss": true,
+    "stop_on_profit": true,
+    "end_of_day_flatten": true,
+    "session_timeout": 30
+  },
+  "trading_hours": {
+    "start": "09:30",
+    "end": "16:00",
+    "timezone": "America/New_York",
+    "pre_market_start": "04:00",
+    "pre_market_end": "09:30",
+    "after_hours_start": "16:00",
+    "after_hours_end": "20:00",
+    "enable_pre_market": false,
+    "enable_after_hours": false,
+    "allow_regular": true,
+    "allow_pre_market": false,
+    "allow_after_hours": false
+  }
+}
